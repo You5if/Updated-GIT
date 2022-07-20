@@ -174,12 +174,7 @@ export class SystemAccountComponent implements OnInit {
             if(this.ver2.tableColumnId == 472){
               this.val2 = this.ver2.value
             }
-            if(this.ver2.tableColumnId == 470){
-              this.dapiService.generateCode(this.val1, this.val2).subscribe(res => {
-                this.resVal = res
-                this.ver2.value = this.resVal[0].name
-              })
-            }
+            
 
 
             // this.tableId = this.ver2.refId;
@@ -201,7 +196,7 @@ export class SystemAccountComponent implements OnInit {
       }
 
       console.log("LL", this.light)
-      if(localStorage.getItem(this._globals.baseAppName + '_Add&Edit') == "Add") {
+      if(localStorage.getItem(this._globals.baseAppName + '_Add&Edit2') == "Add") {
         for(let i=0;i<this.light.length;i++){
         
           this.ver5 = this.light[i]
@@ -368,7 +363,7 @@ export class SystemAccountComponent implements OnInit {
       }
       if(x == 1) {
         this._ui.loadingStateChanged.next(true);
-        this.dapiService.generateCode(this.val11, id.toString()).subscribe(res => {
+        this.dapiService.generateCode(this.data[2].value, id.toString()).subscribe(res => {
           this._ui.loadingStateChanged.next(false);
           this.resVal = res
           console.log("VV", res)
