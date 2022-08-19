@@ -80,7 +80,7 @@ export class MyFilterComponent implements OnInit {
       this._ui.loadingStateChanged.next(false);
       console.log(result);
       this.done = result
-      this.done.forEach((beju) => {
+      this.done.forEach((beju:any) => {
         beju.array1 = this.choices1
         beju.array2 = this.choices2
         beju.operation = 'None'

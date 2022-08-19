@@ -8,7 +8,7 @@ import { map, catchError } from 'rxjs/operators';
 // import { element, elementClassProp } from '@angular/core/src/render3';
 import { Http, Response } from '@angular/http';
 import { AuthService } from 'src/app/components/security/auth/auth.service';
-import { forexRateModel, journalentrydetailModel, JournalEntryModel } from './journalentry.model';
+import { journalentrydetailModel, JournalEntryModel } from './journalentry.model';
 
 @Injectable({
 providedIn: 'root'
@@ -86,9 +86,9 @@ export class JournalEntryService {
       }
      }
 
-     getForexRate(idC:number, idD:string): Observable<forexRateModel> {
-      return this.httpClient.get<forexRateModel>(this._globals.baseAPIUrl + 'SuppForex/getforex/' + idC + '/' + idD).pipe(
-      map((result: forexRateModel) => {
+     getForexRate(idC:number, idD:string): Observable<any> {
+      return this.httpClient.get<any>(this._globals.baseAPIUrl + 'SuppForex/getforex/' + idC + '/' + idD).pipe(
+      map((result: any) => {
       return result;
       }), catchError(this._cf.handleError)
       );

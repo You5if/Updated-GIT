@@ -20,39 +20,6 @@
   }
 }
 
-.rowRG2 {
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  background: #20bf6b;
-}
-.rowRG {
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  background: #20bf6b;
-}
-.rowRY {
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  background: #ece57c;
-}
-.rowRR {
-  background: rgb(224, 103, 103);
-}
-.rowRG:hover {
-  background: #f1f2f6;
-  transform: scale(1.05);
-  padding: 0 24px;
-
-  .cent {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 17px !important;
-    font-weight: bold;
-  }
-  // box-shadow: 0 0px 0px rgba(0, 0, 0, 0), 0 1px 5px rgba(0, 0, 0, 0.1) inset;
-}
-
 .chImg {
   cursor: pointer;
   margin-left: 20px;
@@ -85,11 +52,27 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
-.rowR2 {
+.rowR:hover {
+  background: #f1f2f6;
+  transform: scale(1.05);
+  padding: 0 24px;
+
+  .cent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px !important;
+    font-weight: bold;
+  }
+  // box-shadow: 0 0px 0px rgba(0, 0, 0, 0), 0 1px 5px rgba(0, 0, 0, 0.1) inset;
+}
+.rowY {
   cursor: pointer;
+  background: #f5d9c1;
+  // background: #e74c3c;
   transition: all 0.2s ease-in-out;
 }
-.rowR:hover {
+.rowY:hover {
   background: #f1f2f6;
   transform: scale(1.05);
   padding: 0 24px;

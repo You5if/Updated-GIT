@@ -8,7 +8,6 @@ import { map, catchError } from 'rxjs/operators';
 // import { element, elementClassProp } from '@angular/core/src/render3';
 import { Http, Response } from '@angular/http';
 import { AuthService } from 'src/app/components/security/auth/auth.service';
-import { phInvoiceState } from '../../journalentry.model';
 
 
 @Injectable({
@@ -34,17 +33,13 @@ export class CheckfordeleteService {
     
   
 
-    getDelete(id: number): Observable<any> {
-      return this.httpClient.get<any>(this._globals.baseAPIUrl +  'JournalEntry/approve/' + id).pipe(
+    getDelete(name:string ,id: number): Observable<any> {
+      return this.httpClient.get<any>(this._globals.baseAPIUrl + name + '/delete/' + id).pipe(
       map((result: any) => {
       return result;
       }), catchError(this._cf.handleError)
       );
      }
-
-     sendState(model: phInvoiceState){
-      return this.http.post(this._globals.baseAPIUrl + 'PhInvoice/updatestate',model);
-   }
 
      
 }

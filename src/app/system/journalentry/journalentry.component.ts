@@ -9,7 +9,7 @@ import { AuthService } from 'src/app/components/security/auth/auth.service';
 import { JournalEntryEntryComponent } from './journalentry-entry/journalentry-entry.component';
 import { JournalEntryModel } from './journalentry.model';
 import { RightModel } from 'src/app/components/security/auth/rights.model';
-import { Router, RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { PageSortComponent } from 'src/app/components/common/pageevents/page-sort/page-sort.component';
 import { JournalEntryService } from './journalentry.service';
 import { SelectModel } from 'src/app/components/misc/SelectModel';
@@ -22,7 +22,6 @@ import { SystemNavigationComponent } from '../system-navigation/system-navigatio
 import { ReportPageService } from 'src/app/components/PR/report-page/report-page.service';
 import { MySortComponent } from './operation/my-sort/my-sort.component';
 import { MyFilterComponent } from './operation/my-filter/my-filter.component';
-import { CheckforstateComponent } from './operation/statecheck/checkfordelete.component';
 import { Direction } from '@angular/cdk/bidi';
 
 @Component({
@@ -43,10 +42,9 @@ export class JournalEntryComponent implements OnInit {
   amount!: string;
   edit!: string;
   header!: string;
-  opC: boolean = true
 
     displayedColumns: string[] =
-        ['select','code','EntryDate', 'amount', 'currency', 'state', 'report'];
+        ['select','code','EntryDate', 'amount', 'currency', 'report'];
 
     dataSource: any;
     isLastPage = false;
@@ -54,7 +52,6 @@ export class JournalEntryComponent implements OnInit {
     pScreenId: number;
     code!:string
     pTableId: number;
-    state!:string
     recordsPerPage: number;
     currentPageIndex: number;
     ref!: string
@@ -88,7 +85,6 @@ export class JournalEntryComponent implements OnInit {
         private _cf: CommonService,
         private _report: ReportPageService,
         public _nav: SystemNavigationComponent,
-        private router: Router,
         private _ui: UIService,
         private _msg: MessageBoxService,
         private _globals: AppGlobals,
@@ -103,10 +99,10 @@ export class JournalEntryComponent implements OnInit {
         this.recordsPerPage = 10;
         this.currentPageIndex = 1;
         this.menuId = 1019106011;
-        this.titleService.setTitle("Journals - Greenfield");
       }
 
   ngOnInit() {
+    this.titleService.setTitle("Journals - GIS");
     this.pageData = {
       tableId: this.pTableId,
       userId: 26,
@@ -128,7 +124,6 @@ export class JournalEntryComponent implements OnInit {
       this.creditacc = "Credit"
       this.report = "Report"
       this.code = "Code"
-      this.state = "State"
       this.amount = "Amount"
       this.currency = "Currency"
       this.ref = " Reference"
@@ -139,7 +134,6 @@ export class JournalEntryComponent implements OnInit {
       this.entryDate = "التاريخ"
       this.debitacc = "الحسابات"
       this.creditacc = "التامينات"
-      this.state = "الحالة"
       this.ref = "المرجع"
       this.report = "التقرير"
       this.code = "الرمز"
@@ -237,7 +231,7 @@ export class JournalEntryComponent implements OnInit {
   
   onMyFilter  () {
 
-      const dialogRef = this.dialog.open(MyFilterComponent, {
+    const dialogRef = this.dialog.open(MyFilterComponent, {
         disableClose: true,
         data: {
           tableId: 15,
@@ -254,33 +248,7 @@ export class JournalEntryComponent implements OnInit {
     this.paginator.firstPage()
   }
 
-  onState  (id: number, status:any, rState: number) {
-    
-        if (rState != 2203) {
-          let stateModel = {
-            statusId :id
-          }
-          this._ui.loadingStateChanged.next(true);
-          this.opC = false
-          this.openState(stateModel);
-          this._ui.loadingStateChanged.next(false);
-        }
-    
-  };
-
-  openState  (result: any) {
-    const dialogRef = this.dialog.open(CheckforstateComponent, {
-      disableClose: true,
-      
-      data: result
-    });
-  dialogRef.afterClosed().subscribe(() => {
-    this.refreshMe();
-  });
-};
-
   onReport(jourId:number) { 
-    this.opC = false
     var reportId: number
     reportId = 8
     // if (report == "Expense") {
@@ -296,8 +264,7 @@ export class JournalEntryComponent implements OnInit {
      
     console.log(restOfUrl)
     this._report.passReportData({ reportId: reportId, restOfUrl: restOfUrl }); 
-    // this._nav.onClickListItem('FRP');
-    this.router.navigate(['/System/FinancialReportsPage']);
+    this._nav.onClickListItem('FRP');
   }
 
   applyFilter(filterValue: string) {
@@ -384,28 +351,21 @@ export class JournalEntryComponent implements OnInit {
     });
   }
 
-  onEdit = (id: number, rState: number) => {
-    if (rState != 2203) {
-      if(this.opC == true) {
-        this._ui.loadingStateChanged.next(true);
-        this.journalentryservice.getJournalEntryEntry(id).subscribe((result: JournalEntryModel) => {
-          this._ui.loadingStateChanged.next(false);
-          result.entryMode = 'E';
-          result.readOnly = false;
-          if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
-            localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "Edit journal");
-          }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
-            localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "تعديل سجل");
-          }
-          this.openEntry(result);
-        });
-      }else {
+  onEdit = (id: number, recordAuthor:Number) => {
+    if (recordAuthor!=2202){
+      this._ui.loadingStateChanged.next(true);
+      this.journalentryservice.getJournalEntryEntry(id).subscribe((result: JournalEntryModel) => {
         this._ui.loadingStateChanged.next(false);
-        this.opC = true
-      }
-    }else {
-      console.log('user');
-      
+        result.entryMode = 'E';
+        result.readOnly = false;
+        if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
+          localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "Edit journal");
+        }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
+          localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "تعديل سجل");
+        }
+        this.openEntry(result);
+      });
+
     }
   }
 
@@ -437,7 +397,7 @@ export class JournalEntryComponent implements OnInit {
 
   }
 
-  openEntry (result: JournalEntryModel) {
+  openEntry  (result: JournalEntryModel) {
     if (result === undefined) {
       const dialogRef = this.dialog.open(JournalEntryEntryComponent, {
         disableClose: true,

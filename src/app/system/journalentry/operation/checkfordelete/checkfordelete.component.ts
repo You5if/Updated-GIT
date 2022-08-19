@@ -9,10 +9,10 @@ import { CheckfordeleteService } from './checkfordelete.service';
   templateUrl: './checkfordelete.component.html',
   styleUrls: ['./checkfordelete.component.scss']
 })
-export class CheckforstateComponent implements OnInit {
+export class CheckfordeleteComponent implements OnInit {
 
-  constructor(public dialogRef: MatDialogRef<CheckforstateComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
+  constructor(public dialogRef: MatDialogRef<CheckfordeleteComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DeleteModel,
         private invoiceservice: CheckfordeleteService) { }
 
   ngOnInit() {
@@ -24,7 +24,7 @@ export class CheckforstateComponent implements OnInit {
   }
 
   onYesClick(): void{
-    this.invoiceservice.getDelete(this.data.statusId).subscribe((result) => {
+    this.invoiceservice.getDelete(this.data.name, this.data.id).subscribe((result) => {
       this.dialogRef.close();
     })
   }

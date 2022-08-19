@@ -88,25 +88,3 @@ export class SortingModel {
                 name: string,
         id: number;
               }
-
-              export class forexRateModel {
-                constructor(
-                        public id: number,
-                        public name: string,
-                       
-                        
-                ) { }
-        }
-
-        export class phInvoiceState { 
-                constructor (
-                        public  phInvoiceId :number,
-                        public  stateId :number,
-                        public  userId :number,
-                        public  roleId :number, 
-                        public  remarks :string, 
-                        public  status :number
-        
-                ) { }
-                
-            }

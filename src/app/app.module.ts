@@ -264,8 +264,9 @@ import { SystemHomeComponent } from "./system/system-home/system-home.component"
 import { CheckfordeleteComponent } from "./system/workspace/card-entry/checkfordelete/checkfordelete.component";
 import { MyFilterComponent } from "./system/journalentry/operation/my-filter/my-filter.component";
 import { MySortComponent } from "./system/journalentry/operation/my-sort/my-sort.component";
-import { CheckforstateComponent } from "./system/journalentry/operation/statecheck/checkfordelete.component";
+
 import { AlertifyService } from "./alertify.service";
+import { MyTestAutoComponent } from "./system/my-test-auto/my-test-auto.component";
 
 
 
@@ -516,9 +517,9 @@ export const jwtConfig = {
     CheckfordeleteComponent,
     ChangePasswordNewComponent,
     CardUserEntryComponent,
-    CheckforstateComponent,
     MyFilterComponent,
-    MySortComponent
+    MySortComponent,
+    MyTestAutoComponent
 
 
 
@@ -676,7 +677,6 @@ export const jwtConfig = {
     CheckfordeleteComponent,
     ChangePasswordNewComponent,
     CardUserEntryComponent,
-    CheckforstateComponent,
     MyFilterComponent,
     MySortComponent
   ]

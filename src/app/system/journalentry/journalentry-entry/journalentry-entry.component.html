@@ -23,23 +23,23 @@
                          type="date" (input)="onChangeDate($event)" [(ngModel)]= "pModel.entryDate" [readonly]= "pModel.readOnly"  >           
                        </mat-form-field>          </mat-list-item>
               <mat-list-item>
-                <div fxLayout fxLayoutGap="5px">
-                  <h1>Currency</h1>
-                  <h1>:</h1>
-                  <h1>{{curName}}</h1>
+                <div class="matC">
+                  <app-my-test-auto style="width: 100%;" matNativeControl name="currency" refId="miscdetailid" refCondition="miscid=17" 
+                  refTable="miscdetail" refColumn="misctext"  [initialValue]="pModel.currency.toString()" 
+                  (resultId)="onResults(pModel, $event, 'currency')" [disabled]="pModel.readOnly" appearance="outline">
+                </app-my-test-auto>
                 </div>
-                </mat-list-item>
-              <!-- <mat-list-item>
-                <mat-form-field class="matC" appearance="outline">
+
+                <!-- <mat-form-field class="matC" appearance="outline">
                   <mat-select matNativeControl name="currency" [placeholder]="currency"
                     [(ngModel)]="pModel.currency" (selectionChange)="onChangeCurrency($event.value)" [disabled]="pModel.readOnly">
                     <mat-option *ngFor="let item of currencyType" [value]="item.id">
                       {{item.name}}
                     </mat-option>
                   </mat-select>
-                </mat-form-field>
-                </mat-list-item> -->
-                <!-- <mat-list-item>            
+                </mat-form-field> -->
+                </mat-list-item>
+                <mat-list-item>            
                   <mat-form-field appearance="outline" class="matD date-field">
                        <mat-label> {{forexRate}} </mat-label>          
                         <input matInput name="forexRate" 
@@ -47,7 +47,7 @@
                          type="text" [(ngModel)] = "pModel.forexRate" [readonly]= "pModel.readOnly"  >           
                        </mat-form-field> 
                       
-                               </mat-list-item> -->
+                               </mat-list-item>
               </div>
               <div fxLayout.gt-xs fxLayout.xs="column">
                 
@@ -62,6 +62,13 @@
                 
               <mat-list-item>            <mat-form-field appearance="outline" class="matD date-field">   <mat-label>{{dated}}</mat-label>           <input matInput name="date" [placeholder]="dated" type="date" [(ngModel)] = "pModel.entryDate" [readonly]= "pModel.readOnly"  >            </mat-form-field>          </mat-list-item>
               <mat-list-item>
+                <div class="matC">
+                  <app-my-test-auto style="width: 100%;" refId="miscdetailid" refCondition="miscid=17" refTable="miscdetail" refColumn="misctext"  
+                  [initialValue]="pModel.currency.toString()" (resultId)="onResults(pModel, $event, 'currency')" [disabled]="pModel.readOnly" 
+                  appearance="outline">
+                </app-my-test-auto>
+                </div>
+
                 <!-- <mat-form-field class="matC" appearance="outline">
                   <mat-select matNativeControl name="currency" [placeholder]="currency"
                     [(ngModel)]="pModel.currency" [disabled]="pModel.readOnly">
@@ -70,13 +77,8 @@
                     </mat-option>
                   </mat-select>
                 </mat-form-field> -->
-                <div fxLayout fxLayoutGap="5px">
-                  <h1>Currency</h1>
-                  <h1>:</h1>
-                  <h1>{{curName}}</h1>
-                </div>
                 </mat-list-item>
-                <!-- <mat-list-item>            
+                <mat-list-item>            
                   <mat-form-field appearance="outline" class="matD date-field">
                        <mat-label> {{forexRate}} </mat-label>          
                         <input matInput name="forexRate" 
@@ -85,7 +87,7 @@
                        </mat-form-field> 
                       
                                </mat-list-item>
-   -->
+  
                                <!-- <mat-list-item>
                                 <mat-form-field appearance="outline" class="matD date-field">
                                   <mat-label>{{company}}</mat-label>
@@ -140,6 +142,13 @@
                                         <mat-label>{{narration}}</mat-label>
                                         <input class="inp"  [ngModelOptions]="{standalone: true}" class="description"  matInput  [placeholder]="narration" type="textArea" [value]="elem[i].narration"   [(ngModel)] = "elem[i].narration" [readonly]= "elem[i].readOnly"  >
                                       </mat-form-field>
+                                      <!-- <div class="dWidth">
+                                        <app-my-test-auto style="width: 100%;" refId="syscompid" refCondition="active=1 and deleted=0 and syscompid>1" 
+                                          refTable="syscomp" refColumn="BusinessName" [labelValue]="company"  [initialValue]="elem[i].sysCompanyId1" 
+                                          (resultId)="onResults(elem[i],$event,'company');" [disabled]="pModel.readOnly" cssClass="inside">
+                                        </app-my-test-auto>
+                                      </div> -->
+                      
                                       <!-- <mat-form-field  class="dWidth">
                                         <mat-label>{{company}}</mat-label>
                                         <mat-select [(ngModel)]="elem[i].sysCompanyId1" [ngModelOptions]="{standalone: true}">
@@ -153,14 +162,22 @@
                                       <mat-label>account</mat-label>
                                       <input [ngModelOptions]="{standalone: true}" [(ngModel)]="elem[i].accountId1" [value]="value.accountId1" appearance="outline" matInput  type="number">
                                     </mat-form-field> -->
-                                    <mat-form-field >
+                                      <div >
+                                        <app-my-test-auto style="width: 100%;" refId="accountid" refCondition="active=1 and deleted=0 and accountid>1" 
+                                          refTable="account" refColumn="concat(accountname,':',accountcode)" [labelValue]="acc"  
+                                          [initialValue]="elem[i].accountId1" (resultId)="onResults(elem[i],$event,'account',i);" 
+                                          [disabled]="pModel.readOnly" cssClass="inside">
+                                        </app-my-test-auto>
+                                      </div>
+                      
+                                    <!-- <mat-form-field >
                                       <mat-label>{{acc}}</mat-label>
                                       <mat-select [(ngModel)]="elem[i].accountId1" (selectionChange)="onChangeAccount1($event.value, i)" [ngModelOptions]="{standalone: true}">
                                         <mat-option *ngFor="let type of accountType" [value]="type.id">
                                           {{type.name}}
                                         </mat-option>
                                       </mat-select>
-                                    </mat-form-field>
+                                    </mat-form-field> -->
                   
                                     <mat-form-field class="dWidth">
                                       <mat-label>{{debit}}</mat-label>
@@ -176,22 +193,34 @@
                                     </mat-form-field>
                                     </div>
                                   <div fxLayout.gt-sm fxLayout.lt-md="column" fxLayoutGap="10px">
-                                    <mat-form-field *ngIf="elem[i].showCustomer1" class="dWidth">
+                                    <!-- <div  *ngIf="elem[i].showCustomer1" class="dWidth">
+                                      <app-my-test-auto style="width: 100%;" refId="customerid" refCondition="active=1 and deleted=0 and customerid>1" refTable="customer" refColumn="customername" [labelValue]="customer"  [initialValue]="elem[i].customerId1" (resultId)="onResults(elem[i],$event,'customer',i);" [disabled]="pModel.readOnly" cssClass="inside"></app-my-test-auto>
+                                    </div> -->
+                    
+                                    <!-- <mat-form-field *ngIf="elem[i].showCustomer1" class="dWidth">
                                       <mat-label>{{customer}}</mat-label>
                                       <mat-select [(ngModel)]="elem[i].customerId1" [ngModelOptions]="{standalone: true}">
                                         <mat-option *ngFor="let type of customers" [value]="type.id">
                                           {{type.name}}
                                         </mat-option>
                                       </mat-select>
-                                    </mat-form-field>
-                                    <mat-form-field *ngIf="elem[i].showSupplier1" class="dWidth">
+                                    </mat-form-field> -->
+                                    <!-- <div  *ngIf="elem[i].showSupplier1" class="dWidth">
+                                      <app-my-test-auto style="width: 100%;" refId="Supplierid" refCondition="active=1 and deleted=0 and Supplierid>1" refTable="Supplier" refColumn="Suppliername" [labelValue]="supplier"  [initialValue]="elem[i].supplierId1" (resultId)="onResults(elem[i],$event,'supplier',i);" [disabled]="pModel.readOnly" cssClass="inside"></app-my-test-auto>
+                                    </div> -->
+                    
+                                    <!-- <mat-form-field *ngIf="elem[i].showSupplier1" class="dWidth">
                                       <mat-label>{{supplier}}</mat-label>
                                       <mat-select [(ngModel)]="elem[i].supplierId1" [ngModelOptions]="{standalone: true}">
                                         <mat-option *ngFor="let type of suppliers" [value]="type.id">
                                           {{type.name}}
                                         </mat-option>
                                       </mat-select>
-                                    </mat-form-field>
+                                    </mat-form-field> -->
+                                    <!-- <div  *ngIf="elem[i].showCost1" class="dWidth">
+                                      <app-my-test-auto style="width: 100%;" refId="costcenterid" refCondition="active=1 and deleted=0 and costcenterid>1" refTable="costcenter" refColumn="costname" [labelValue]="costcenter"  [initialValue]="elem[i].costCenterId1" (resultId)="onResults(elem[i],$event,'costcenter',i);" [disabled]="pModel.readOnly" cssClass="inside"></app-my-test-auto>
+                                    </div> -->
+                    
                                     <!-- <mat-form-field *ngIf="elem[i].showCost1" class="dWidth">
                                       <mat-label>{{costcenter}}</mat-label>
                                       <mat-select [(ngModel)]="elem[i].costCenterId1" [ngModelOptions]="{standalone: true}">
@@ -200,6 +229,9 @@
                                         </mat-option>
                                       </mat-select>
                                     </mat-form-field> -->
+                                    <!-- <div  *ngIf="elem[i].showShare1" class="dWidth">
+                                      <app-my-test-auto style="width: 100%;" refId="shareholderid" refCondition="active=1 and deleted=0 and shareholderid>1" refTable="shareholder" refColumn="shname" [labelValue]="shareholder"  [initialValue]="elem[i].shareholderId1" (resultId)="onResults(elem[i],$event,'shareholder',i);" [disabled]="pModel.readOnly" cssClass="inside"></app-my-test-auto>
+                                    </div> -->
                                    
                                     <!-- <mat-form-field *ngIf="elem[i].showShare1" class="dWidth">
                                       <mat-label>{{shareholder}}</mat-label>

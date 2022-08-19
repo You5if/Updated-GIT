@@ -5,7 +5,7 @@ import { AuthService } from 'src/app/components/security/auth/auth.service';
 import { CommonService } from 'src/app/components/common/common.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { forexRateModel, journalentrydetailModel, JournalEntryModel } from '../journalentry.model';
+import { journalentrydetailModel, JournalEntryModel } from '../journalentry.model';
 import { APIResultModel } from 'src/app/components/misc/APIResult.Model';
 import { JournalEntryService } from '../journalentry.service';
 import { Observable, of } from 'rxjs';
@@ -89,7 +89,6 @@ journalEntryDetailDeletedElementsArray: journalentrydetailModel[] = [];
 journalEntryDetailTableValueAfterDeleteArray: journalentrydetailModel[] = [];
 journalEntryDetailDataSource = new MatTableDataSource(this.journalEntryDetailData);
 elemSource = new MatTableDataSource(this.elem);
-  curName!: string;
 
 
   constructor(
@@ -158,36 +157,32 @@ elemSource = new MatTableDataSource(this.elem);
 
     this._select.getDropdown('miscdetailid','miscdetail','misctext','miscid=17',false).subscribe((res: SelectModel[]) => {
       this.currencyType = res;
-      res.forEach((cur) => {
-        if (cur.id === this.pModel.currency) {
-          this.curName = cur.name
-        }
-      })
   });
 
-  this._select.getDropdown('accountid','account',"concat(accountcode,':',accountname)",'active=1 and deleted=0 and accountid>1',false).subscribe((res: SelectModel[]) => {
+  this._select.getDropdown('accountid','account',"concat(accountname,':',accountcode)",'active=1 and deleted=0 and accountid>1',false).subscribe((res: SelectModel[]) => {
     this.accountType = res;
-    console.log(res);
 });
-  this._select.getDropdown('CustomerAccountId','CustomerAccount',"concat(studentcode,':',Ename)",'active=1 and deleted=0 and CustomerAccountId>1',false).subscribe((res: SelectModel[]) => {
-    this.customers = res;
-});
-  this._select.getDropdown('Supplierid','Supplier','Suppliername','active=1 and deleted=0 and Supplierid>1',false).subscribe((res: SelectModel[]) => {
-    this.suppliers = res;
-});
-  this._select.getDropdown('costcenterid','costcenter','costname','active=1 and deleted=0 and costcenterid>1',false).subscribe((res: SelectModel[]) => {
-    this.costcenters = res;
-});
-  this._select.getDropdown('shareholderid','shareholder','shname','active=1 and deleted=0 and shareholderid>1',false).subscribe((res: SelectModel[]) => {
-    this.shareholders = res;
-});
-  this._select.getDropdown('syscompid','syscomp','BusinessName','active=1 and deleted=0 and syscompid>1',false).subscribe((res: SelectModel[]) => {
-    this.companys = res;
-});
+//   this._select.getDropdown('customerid','customer','customername','active=1 and deleted=0 and customerid>1',false).subscribe((res: SelectModel[]) => {
+//     this.customers = res;
+// });
+//   this._select.getDropdown('Supplierid','Supplier','Suppliername','active=1 and deleted=0 and Supplierid>1',false).subscribe((res: SelectModel[]) => {
+//     this.suppliers = res;
+// });
+//   this._select.getDropdown('costcenterid','costcenter','costname','active=1 and deleted=0 and costcenterid>1',false).subscribe((res: SelectModel[]) => {
+//     this.costcenters = res;
+// });
+//   this._select.getDropdown('shareholderid','shareholder','shname','active=1 and deleted=0 and shareholderid>1',false).subscribe((res: SelectModel[]) => {
+//     this.shareholders = res;
+// });
+//   this._select.getDropdown('syscompid','syscomp','BusinessName','active=1 and deleted=0 and syscompid>1',false).subscribe((res: SelectModel[]) => {
+//     this.companys = res;
+// });
     this._myService.getJournalEntryDetailbyJournalEntry(this.pModel.journalEntryId).subscribe(
         (result) => {
           console.log("Res:",result, this.pModel)
           if(result.length > 1) {
+            console.log('true');
+            
             this.pModel.journalEntryDetailEntry = result;
           this.journalEntryDetailData = [...this.pModel.journalEntryDetailEntry];
           this.journalEntryDetailDataSource.data = [...this.journalEntryDetailData];
@@ -207,7 +202,7 @@ elemSource = new MatTableDataSource(this.elem);
               costCenterId1: this.pModel.journalEntryDetailEntry[s].costCenterId,
               shareholderId1: this.pModel.journalEntryDetailEntry[s].shareholderId,
               showShare1:null as any,
-      showCustomer1: null as any,
+      showCustomer1:null as any ,
       showCost1:null as any,
       showSupplier1:null as any,
               reference: this.pModel.journalEntryDetailEntry[s].reference,
@@ -218,6 +213,7 @@ elemSource = new MatTableDataSource(this.elem);
               readOnly: false,
               auditColumns: this._auth.getAuditColumns()
             }
+            console.log('aaa', row)
             if(this.pModel.journalEntryDetailEntry[s].customerId > 1) {
               row.showCustomer1 = true
             }else {
@@ -248,7 +244,7 @@ elemSource = new MatTableDataSource(this.elem);
 
         
           
-          this.elem.forEach((one) => {
+          this.elem.forEach((one:any) => {
             if(one && one.value != this.num) {
               one.collapse = false
               one.numTitle = true
@@ -294,7 +290,7 @@ elemSource = new MatTableDataSource(this.elem);
       }
 
       console.log("PModel:", this.pModel)
-      this.elem.forEach((uni) => {
+      this.elem.forEach((uni:any) => {
         if(uni && uni.collapse) {
           this.refr = uni.reference
           this.narr = uni.narration
@@ -302,12 +298,14 @@ elemSource = new MatTableDataSource(this.elem);
         }
       })
 
-      this._myService.getForexRate(this.pModel.currency, this.pModel.entryDate).subscribe((resu: forexRateModel) => {
-        this._ui.loadingStateChanged.next(false);
-        console.log(resu)
-        this.pModel.forexRate = resu.name
-        
-      })
+      // if(this.pModel.forexRate!= ) {
+      //   this._myService.getForexRate(this.pModel.currency, this.pModel.entryDate).subscribe((resu: forexRateModel) => {
+      //     this._ui.loadingStateChanged.next(false);
+      //     console.log(resu)
+      //     this.pModel.forexRate = resu.name
+          
+      //   })
+      // }
 
       
   }
@@ -320,6 +318,12 @@ elemSource = new MatTableDataSource(this.elem);
   onNarrChange(searchValue: string): void {
     console.log('I ran from narr change');
     this.elem[this.selectedElement].narration = searchValue
+  }
+
+  log(a:any,b:any){
+    console.log(a,b);
+    // a=b
+    
   }
 
   addJournalEntryDetailRecord() {
@@ -408,9 +412,9 @@ elemSource = new MatTableDataSource(this.elem);
       showSupplier1:false,
       
       supplierId1:2,
-      costCenterId1:2,
+      costCenterId1:1,
       shareholderId1:2,
-      sysCompanyId1:2,
+      sysCompanyId1:1,
       reference: '',
       narration: '',
       debit1: 1,
@@ -457,7 +461,7 @@ elemSource = new MatTableDataSource(this.elem);
   }
 
   onChangeCurrency(id: number){
-    this._myService.getForexRate(id, this.pModel.entryDate).subscribe((resu: forexRateModel) => {
+    this._myService.getForexRate(id, this.pModel.entryDate).subscribe((resu: any) => {
       this._ui.loadingStateChanged.next(false);
       console.log(resu)
       this.pModel.forexRate = resu.name
@@ -465,8 +469,8 @@ elemSource = new MatTableDataSource(this.elem);
     })
   }
   onChangeDate(e: Event){
-    let id= (<HTMLInputElement>e.target).value
-    this._myService.getForexRate(this.pModel.currency, id).subscribe((resu: forexRateModel) => {
+    let id =(<HTMLInputElement>e.target).value
+    this._myService.getForexRate(this.pModel.currency, id).subscribe((resu: any) => {
       this._ui.loadingStateChanged.next(false);
       console.log(resu)
       this.pModel.forexRate = resu.name
@@ -522,13 +526,24 @@ elemSource = new MatTableDataSource(this.elem);
       
   });
     
-    // if(id === 107) {
-    //   this.elem[i].showShare1 = true
-    // }else
-     if(id === 82) {
+    if(id === 107) {
+      this.elem[i].showShare1 = true
+      this.elem[i].showSupplier1 = false
+      this.elem[i].showCustomer1 = false
+      this.elem[i].supplierId1 = 1
+      this.elem[i].customerId1 = 1
+    }else if(id === 131) {
       this.elem[i].showSupplier1 = true
-    }else if(id === 81) {
+      this.elem[i].showShare1 = false
+      this.elem[i].showCustomer1 = false
+      this.elem[i].shareholderId1 = 1
+      this.elem[i].customerId1 = 1
+    }else if(id === 132) {
       this.elem[i].showCustomer1 = true
+      this.elem[i].showShare1 = false
+      this.elem[i].showSupplier1 = false
+      this.elem[i].shareholderId1 = 1
+      this.elem[i].supplierId1 = 1
     }else {
       this.elem[i].showShare1 = false
       this.elem[i].showSupplier1 = false
@@ -554,12 +569,11 @@ elemSource = new MatTableDataSource(this.elem);
       
   });
     
-    // if(id === 107) {
-    //   this.elem[i].showShare2 = true
-    // }else
-     if(id === 82) {
+    if(id === 107) {
+      this.elem[i].showShare2 = true
+    }else if(id === 131) {
       this.elem[i].showSupplier2 = true
-    }else if(id === 81) {
+    }else if(id === 132) {
       this.elem[i].showCustomer2 = true
     }else {
       this.elem[i].showShare2 = false
@@ -583,6 +597,42 @@ elemSource = new MatTableDataSource(this.elem);
     if(e.keyCode === 13){
        this.onSubmit();
     }
+  }
+
+  onResults(model:any, e:any, drop:any,i?:number) {
+    // this.pModel.currency=e
+    console.log('ee',e,model);
+    if(drop==='currency'){
+      model.currency=e
+      this.onChangeCurrency(e)
+    }else if(drop==='company'){
+      // model.sysCompanyId1=e
+    }else if(drop==='account'){
+      model.accountId1=e
+      console.log("i",i);
+      
+      this.onChangeAccount1(e, i!)
+    }else if(drop==='customer'){
+      model.customerId1=e
+    }else if(drop==='supplier'){
+      model.supplierId1=e
+    }else if(drop==='costcenter'){
+      // model.costCenterId1=e
+    }else if(drop==='shareholder'){
+      model.shareholderId1=e
+    }
+    
+    // this.light.forEach((res:any) => {
+    //   if (res.tableColumnId === id) {
+    //     console.log('ee', e);
+        
+    //     res.value = e.toString()
+    //     // if(res.tableColumnId === 195) {
+    //     //   this.onChangeValue(res.value)
+    //     // }
+        
+    //   }
+    // })
   }
 
   onSubmit () {
@@ -642,7 +692,8 @@ elemSource = new MatTableDataSource(this.elem);
 
       // form.auditColumns = this._auth.getAuditColumns();
       // form.entryMode = this.pModel.entryMode;
-
+    console.log(JSON.stringify(this.pModel));
+    
       try {
           // Calling the service(api) to submit the data
           this._myService.getJournalEntrySubmit(this.pModel)!.subscribe((result: APIResultModel) => {
