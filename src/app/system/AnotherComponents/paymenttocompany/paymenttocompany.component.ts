@@ -1,8 +1,7 @@
-
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { CommonService } from 'src/app/components/common/common.service';
 import { UIService } from 'src/app/components/shared/uiservices/UI.service';
 import { MessageBoxService } from 'src/app/components/messagebox/message-box.service';
@@ -19,6 +18,13 @@ import { Send } from 'src/app/send.model';
 import { AppGlobals } from 'src/app/app.global';
 import { SelectionModel } from '@angular/cdk/collections';
 
+import { FilterService } from 'src/app/components/filter/filter.service';
+import { AlertifyService } from 'src/app/alertify.service';
+import { DeleteModel } from '../invoice/invoice.model';
+import { MySortComponent } from '../../journalentry/operation/my-sort/my-sort.component';
+import { MyFilterComponent } from '../../journalentry/operation/my-filter/my-filter.component';
+import { CheckfordeleteComponent } from '../../journalentry/operation/checkfordelete/checkfordelete.component';
+import { CheckforstateCompComponent } from './statecheck/checkfordelete.component';
 import { Direction } from '@angular/cdk/bidi';
 
 @Component({
@@ -29,25 +35,26 @@ import { Direction } from '@angular/cdk/bidi';
 
 export class PaymentToCompanyComponent implements OnInit {
 
-  idS : number;
-  direction: Direction;
-  customerCode: string;
-  customerName: string;
-  customerMobile: string;
-  customer: string;
-  amount: string;
-  currency: string;
-  balance: string;
-  edit: string;
-  header: string;
-  submit: string;
-  cancel: string;
+  idS! : number;
+  direction!: Direction;
+  customerCode!: string;
+  customerName!: string;
+  customerMobile!: string;
+  customer!: string;
+  amount!: string;
+  currency!: string;
+  receiptno!: string;
+  balance!: string;
+  edit!: string;
+  header!: string;
+  submit!: string;
+  cancel!: string;
+  state!:string;
   selection = new SelectionModel<PaymentToCompanyModel>(true, []);;
 
-  model: Send;
-    displayedColumns: string[] =
-        ['select','PaymentDate', 'PaymentCode', 'PaymentType','customer', 'amount', 'currency'];
-
+  role = localStorage.getItem("role");
+  model!: Send;
+    displayedColumns!: string[]
     dataSource: any;
     isLastPage = false;
     pTableName: string;
@@ -56,14 +63,19 @@ export class PaymentToCompanyComponent implements OnInit {
     recordsPerPage: number;
     currentPageIndex: number;
     menuId: number;
+    pageData: any
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-    paymentDate:string;
-    paymentCode:string;
-    paymentType:string;
-    indexes!: any[];
+    deleteModel!: DeleteModel
+      opC: boolean = true
+    paymentDate!:string;
+    paymentCode!:string;
+    paymentType!:string;
+    delete!: string
+    indexes!: any[]
     clickedRows = new Set<PaymentToCompanyModel>();
 
-    totalRecords: number;
+    totalRecords!: number;
     pageSizeOptions: number[] = [5, 10, 25, 100];
 
     screenRights: RightModel = {
@@ -83,6 +95,7 @@ export class PaymentToCompanyComponent implements OnInit {
         private _cf: CommonService,
         private _globals: AppGlobals,
         private _ui: UIService,
+        private alertify: AlertifyService,
         private _msg: MessageBoxService,
         private _auth: AuthService,
         private _select: SelectService,
@@ -97,6 +110,45 @@ export class PaymentToCompanyComponent implements OnInit {
       }
 
   ngOnInit() {
+    this.pageData = {
+      tableId: this.pTableId,
+      userId: this._auth.getUserId(),
+      recordsPerPage: 10,
+      pageNo: 1,
+      sort: '',
+      filter: ""
+    }
+    this._cf.setSort("")
+    this._cf.setFilter("")
+    console.log(localStorage.getItem("role"));
+
+    if (this.role === '2') {
+      this.displayedColumns =
+        ['select','PaymentDate', 'PaymentCode', 'receiptno', 'PaymentType','customer', 'amount', 'state'];
+
+    } else if (this.role === '3') {
+      this.displayedColumns =
+        ['select','PaymentDate', 'PaymentCode', 'receiptno', 'PaymentType','customer', 'amount'];
+
+    }else if (this.role === '5') {
+      this.displayedColumns =
+        ['select','PaymentDate', 'PaymentCode', 'receiptno', 'PaymentType','customer', 'amount', 'state'];
+
+    }
+    
+    
+    this.pageData = {
+      tableId: this.pTableId,
+      userId: this._auth.getUserId(),
+      recordsPerPage: 10,
+      pageNo: 1,
+      sort: '',
+      filter: ""
+    }
+      this.refreshMe();
+  }
+
+  refreshMe() {
     if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
       this.direction = "ltr"
       this.header = "Revenue"
@@ -104,8 +156,11 @@ export class PaymentToCompanyComponent implements OnInit {
       this.paymentDate = "Payment date"
       this.paymentType = "Payment type"
       this.customer = "Customer"
+      this.state = "State"
       this.amount = "Amount"
+      this.delete = "Delete"
       this.currency = "Currency"
+      this.receiptno = "Receipt"
       this.edit = "Edit"
       this.submit = "Submit"
       this.cancel = "Cancel"
@@ -114,8 +169,11 @@ export class PaymentToCompanyComponent implements OnInit {
       this.header = "الايرادات"
       this.paymentCode = "رمز الدفع"
       this.paymentDate = "تاريخ الدفع"
+      this.receiptno = "الفاتورة"
       this.paymentType = "نوع الدفع"
       this.customer = "العميل"
+      this.delete = "مسح"
+      this.state = "الحالة"
       this.amount = "المبلغ"
       this.currency = "العملة"
       // this.accountCode = "رمز الحساب"
@@ -126,10 +184,17 @@ export class PaymentToCompanyComponent implements OnInit {
       this.submit = "ارسال"
       this.cancel = "الغاء"
     }
-      this.refreshMe();
-  }
-
-  refreshMe() {
+    // this.pageData.sort = this._cf.sortVar
+    // this.pageData.filter = this._cf.filterVar
+    // this._ui.loadingStateChanged.next(true);
+    // this._cf.newGetPageData(this.pTableName, this.pageData).subscribe((result) => {
+    //   this._ui.loadingStateChanged.next(false);
+    //   this.totalRecords = result[0].totalRecords;
+    //   this.recordsPerPage = this.recordsPerPage;
+    //   this.dataSource = new MatTableDataSource(result);
+    //   this.indexes = result
+    //   console.log(result)
+    // })
     this._cf.getPageData('PaymentToCompany', this.pScreenId, this._auth.getUserId(), this.pTableId,
       this.recordsPerPage, this.currentPageIndex, false).subscribe(
         (result) => {
@@ -159,10 +224,117 @@ export class PaymentToCompanyComponent implements OnInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  onState  (id: number,a:any) {
+    
+    var stateModel = {
+      statusId :id
+    }
+    this._ui.loadingStateChanged.next(true);
+    this.opC = false
+    this.openState(stateModel);
+    this._ui.loadingStateChanged.next(false);
+
+};
+
+openState (result: any) {
+  const dialogRef = this.dialog.open(CheckforstateCompComponent, {
+    disableClose: true,
+    
+    data: result
+  });
+dialogRef.afterClosed().subscribe(() => {
+  this.refreshMe();
+});
+};
+  
+
+
+  onSort  () {
+    const dialogRef = this.dialog.open(PageSortComponent, {
+      disableClose: true,
+      data: this.pTableId
+    });
+  };
+
+  onClearSort() {
+    this.pageData.sort = ""
+    this._cf.setSort("")
+    // this.invoiceservice.setFilter("")
+    this._ui.loadingStateChanged.next(true);
+    this._cf.newGetPageData(this.pTableName, this.pageData).subscribe((result) => {
+      this._ui.loadingStateChanged.next(false);
+      this.totalRecords = result[0].totalRecords;
+      this.recordsPerPage = this.recordsPerPage;
+      this.dataSource = new MatTableDataSource(result);
+      this.indexes = result
+    })
+    this.paginator.firstPage()
+  }
+
+  onClearFilter() {
+    this.pageData.filter = ""
+    // this.invoiceservice.setSort("")
+    this._cf.setFilter("")
+    this._ui.loadingStateChanged.next(true);
+    this._cf.newGetPageData(this.pTableName, this.pageData).subscribe((result) => {
+      this._ui.loadingStateChanged.next(false);
+      this.totalRecords = result[0].totalRecords;
+      this.recordsPerPage = this.recordsPerPage;
+      this.dataSource = new MatTableDataSource(result);
+      this.indexes = result
+    })
+    this.paginator.firstPage()
+  }
+   onMySort() {
+
+    const dialogRef = this.dialog.open(MySortComponent, {
+      disableClose: true,
+      data: {
+        tableId: this.pTableId,
+        recordId: 0,
+        userId: 26,
+        roleId: 2,
+        languageId: Number(localStorage.getItem(this._globals.baseAppName + '_language'))
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.refreshMe();
+    });
+    this.paginator.firstPage()
+  }
+
+   onMyFilter() {
+
+    const dialogRef = this.dialog.open(MyFilterComponent, {
+      disableClose: true,
+      data: {
+        tableId: this.pTableId,
+        recordId: 0,
+        userId: 26,
+        roleId: 2,
+        languageId: Number(localStorage.getItem(this._globals.baseAppName + '_language'))
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.refreshMe();
+    });
+    this.paginator.firstPage()
+  }
+
+ 
+
   paginatoryOperation(event: PageEvent) {
+    this.pageData.pageNo = event.pageIndex + 1
     try {
-      this._cf.getPageDataOnPaginatorOperation(event, this.pTableName, this.pScreenId, this._auth.getUserId(),
-        this.pTableId, this.totalRecords).subscribe(
+      this.pageData.sort = this._cf.sortVar
+      this.pageData.filter = this._cf.filterVar
+      this.pageData.recordsPerPage = event.pageSize
+      this._cf.newGetPageDataOnPaginatorOperation(event, this.pTableName, this.pScreenId, this._auth.getUserId(),
+        this.pTableId, this.totalRecords,
+        this.pageData.sort,
+        this.pageData.filter).subscribe(
           (result: any) => {
             this._ui.loadingStateChanged.next(false);
             this.totalRecords = result[0].totalRecords;
@@ -173,32 +345,40 @@ export class PaymentToCompanyComponent implements OnInit {
             this._msg.showAPIError(error);
             return false;
           });
-    } catch (error:any) {
+      // this._cf.getPageDataOnPaginatorOperation(event, this.pTableName, this.pScreenId, this._auth.getUserId(),
+      //   this.pTableId, this.totalRecords).subscribe(
+      //     (result: JournalEntryModel) => {
+      //       this._ui.loadingStateChanged.next(false);
+      //       this.totalRecords = result[0].totalRecords;
+      //       this.recordsPerPage = event.pageSize;
+      //       this.dataSource = result;
+      //     }, error => {
+      //       this._ui.loadingStateChanged.next(false);
+      //       this._msg.showAPIError(error);
+      //       return false;
+      //     });
+    } catch (error: any) {
       this._ui.loadingStateChanged.next(false);
       this._msg.showAPIError(error);
       return false;
     }
   }
 
-  onSort () {
-    const dialogRef = this.dialog.open(PageSortComponent, {
-      disableClose: true,
-      data: this.pTableId
-    });
-  };
 
-  onAdd () {
+  onAdd  () {
     this.model = {
       tableId: 49,
       recordId: 0,
-      userId: 26,
-      roleId: 2,
+      userId: this._auth.getUserId(),
+      roleId: Number(this.role),
       languageId: Number(localStorage.getItem(this._globals.baseAppName + '_language'))
     };
     if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
       localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "Add revenue");
+      localStorage.setItem(this._globals.baseAppName + '_Add&Edit2', "Add");
     }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
       localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "اضافة ابراد");
+      localStorage.setItem(this._globals.baseAppName + '_Add&Edit2', "Add");
     }
     
     this.openEntry2(this.model);
@@ -214,28 +394,41 @@ export class PaymentToCompanyComponent implements OnInit {
     });
   }
 
-  onEdit = (id: number) => {
-    this.model = {
-      tableId: 49,
-      recordId: id,
-      userId: 26,
-      roleId: 2,
-      languageId: Number(localStorage.getItem(this._globals.baseAppName + '_language'))
-    };
-    if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
-      localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "Edit revenue");
-      localStorage.setItem(this._globals.baseAppName + '_Add&Edit2', "Edit");
-    }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
-      localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "تعديل ايراد");
-      localStorage.setItem(this._globals.baseAppName + '_Add&Edit2', "Edit");
+  onEdit = (id: number, recordSt?: number) => {
+    if(this.opC == true) {
+    if (recordSt != 3) {
+      this.model = {
+        tableId: 49,
+        recordId: id,
+        userId: this._auth.getUserId(),
+        roleId: Number(this.role),
+        languageId: Number(localStorage.getItem(this._globals.baseAppName + '_language'))
+      };
+      if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
+        localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "Edit revenue");
+        localStorage.setItem(this._globals.baseAppName + '_Add&Edit2', "Edit");
+      }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
+        localStorage.setItem(this._globals.baseAppName + '_Add&Edit', "تعديل ايراد");
+        localStorage.setItem(this._globals.baseAppName + '_Add&Edit2', "Edit");
+      }
+      
+      this.openEntry2(this.model)
     }
-    
-    this.openEntry2(this.model)
+  }else {
+    this._ui.loadingStateChanged.next(false);
+    this.opC = true
+  }
   }
 
-  onDelete = function(id: number) {
-      
-  };
+  onDelete(idAC:number) { 
+    this.opC = false
+    this.deleteModel = {
+      name: this.pTableName,
+      id: idAC
+    }
+    this.openConfirmDialog(this.deleteModel)
+    
+  }
 
   isAllSelected() {
     const numSelected = this.selection.selected.length;
@@ -262,11 +455,11 @@ export class PaymentToCompanyComponent implements OnInit {
   }
 
 
-  openEntry (result: PaymentToCompanyModel) {
+  openEntry  (result: PaymentToCompanyModel) {
     if (result === undefined) {
       const dialogRef = this.dialog.open(PaymentToCompanyEntryComponent, {
         disableClose: true,
-       data: {}
+        data: {}
       });
       dialogRef.afterClosed().subscribe(() => {
         this.refreshMe();
@@ -275,7 +468,7 @@ export class PaymentToCompanyComponent implements OnInit {
       const dialogRef = this.dialog.open(PaymentToCompanyEntryComponent, {
         disableClose: false,
         data: result
-     });
+      });
       dialogRef.afterClosed().subscribe(() => {
         this.refreshMe();
       });
@@ -283,11 +476,12 @@ export class PaymentToCompanyComponent implements OnInit {
   };
 
   openEntry2 (result: Send) {
+    // let dialogRef
     if (result === undefined) {
       const dialogRef = this.dialog.open(PaymentToCompanyEntryComponent, {
         disableClose: true,
         
-       data: {}
+        data: {}
       });
       dialogRef.afterClosed().subscribe(() => {
         this.refreshMe();
@@ -297,11 +491,31 @@ export class PaymentToCompanyComponent implements OnInit {
         disableClose: true,
         
         data: result
-     });
+      });
       dialogRef.afterClosed().subscribe(() => {
         this.refreshMe();
       });
     }
   };
+
+  openConfirmDialog (result: DeleteModel) {
+    let dialogRef
+    if (result === undefined) {
+      dialogRef = this.dialog.open(CheckfordeleteComponent, {
+        disableClose: true,
+        
+        data: {}
+      });
+    } else {
+      dialogRef = this.dialog.open(CheckfordeleteComponent, {
+        disableClose: true,
+        
+        data: result
+      });
+    }
+    dialogRef.afterClosed().subscribe(() => {
+      this.refreshMe();
+    });
+  }
 
 }

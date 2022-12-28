@@ -8,7 +8,16 @@
 
     <section class="sec"  >
 
-      <button class="add_btn" mat-button color="primary" (click)="onAdd()" [disabled]="!screenRights.createFlag"><mat-icon >add</mat-icon></button>
+      <button *ngIf="role === '2' || role === '3'" class="add_btn" mat-button color="primary" (click)="onAdd()" [disabled]="!screenRights.createFlag"><mat-icon >add</mat-icon></button>
+      <div *ngIf="pageData.sort === ''" class="chImg" (click)="onMySort()"><img class="sfimg" src="../../../../assets/images/svg/sort (3).png" alt=""></div>
+      <div *ngIf="pageData.sort != ''" class="chImg" (click)="onClearSort()"><img class="sfimg" src="../../../../assets/images/svg/sort (2).png" alt=""></div>
+      <div *ngIf="pageData.filter === ''" class="chImg" (click)="onMyFilter()"><img class="sfimg" src="../../../../assets/images/svg/filter-filled-tool-symbol.png" alt=""></div>
+      <div *ngIf="pageData.filter != ''" class="chImg" (click)="onClearFilter()"><img class="sfimg" src="../../../../assets/images/svg/filter-filled-tool-symbol (2).png" alt=""></div>
+      
+      <!-- <div class="chImg" (click)="onMySort()"><img class="sfimg" src="../../../../assets/images/svg/sort (3).png" alt=""></div>
+      <div class="chImg" (click)="onClearSort()"><img class="sfimg" src="../../../../assets/images/svg/sort (2).png" alt=""></div>
+      <div class="chImg" (click)="onMyFilter()"><img class="sfimg" src="../../../../assets/images/svg/filter-filled-tool-symbol.png" alt=""></div>
+      <div class="chImg" (click)="onClearFilter()"><img class="sfimg" src="../../../../assets/images/svg/filter-filled-tool-symbol (2).png" alt=""></div> -->
       <!-- <button mat-button color="primary" (click)="openEntry()">Filter</button>
       <button mat-button color="primary" (click)="onSort()">Sort</button>
       <button mat-button color="primary" (click)="openEntry()" [disabled]="!screenRights.printFlag">Print</button>
@@ -58,6 +67,8 @@
 
     <ng-container matColumnDef="PaymentDate">      <mat-header-cell class="centH" *matHeaderCellDef>{{paymentDate}}</mat-header-cell>     <mat-cell mat-cell class="cent" *matCellDef="let row">{{row.paymentDate | date}}</mat-cell>
     </ng-container>
+    <ng-container matColumnDef="receiptno">      <mat-header-cell class="centH" *matHeaderCellDef>{{receiptno}}</mat-header-cell>     <mat-cell mat-cell class="cent" *matCellDef="let row">{{row.receiptNo}}</mat-cell>
+    </ng-container>
 
     <ng-container matColumnDef="PaymentCode">      <mat-header-cell class="centH" *matHeaderCellDef>{{paymentCode}}</mat-header-cell>     <mat-cell mat-cell class="cent" *matCellDef="let row">{{row.paymentCode}}</mat-cell>
     </ng-container>
@@ -85,10 +96,19 @@
 
     <!-- delete Column -->
     <ng-container matColumnDef="delete">
-      <mat-header-cell *matHeaderCellDef>Delete</mat-header-cell>
-      <mat-cell mat-cell *matCellDef="let row"><button mat-icon-button color="primary"
-          (click)="onDelete(row.paymentToCompanyId)" [disabled]="!screenRights.deleteFlag">
-          <mat-icon small class="mat-icon material-icons" role="img" aria-hidden="true" color="warn">delete</mat-icon>
+      <mat-header-cell class="centH" *matHeaderCellDef>{{delete}}</mat-header-cell>
+      <mat-cell class="cent" mat-cell *matCellDef="let row">
+        <button mat-icon-button color="warn" class="Btn" (click)="onDelete(row.paymentToCompanyId)" [disabled]="!screenRights.editFlag">
+          <mat-icon small class="mat-icon material-icons" role="img" aria-hidden="true">delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="state">
+      <mat-header-cell class="centH" *matHeaderCellDef>{{state}}</mat-header-cell>
+      <mat-cell class="centH" mat-cell *matCellDef="let row">
+        <button *ngIf="row.recordState === 2" mat-icon-button color="primary" class="Btn" (click)="onState(row.paymentToCompanyId, row.status)" [disabled]="!screenRights.editFlag">
+          <i class="fas fa-sync"></i>
         </button>
       </mat-cell>
     </ng-container>
@@ -106,7 +126,21 @@
 
     <mat-header-row class="headerRow" *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
 
-    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onEdit(row.paymentToCompanyId)" class="rowR" [class.active]="clickedRows.has(row)" ></mat-row>
+    <div *ngIf="role === '2'">
+
+      <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onEdit(row.paymentToCompanyId, row.recordState)"  class="{{row.recordState === 3 ? 'rowRG' : 'rowR'}}"   [class.active]="clickedRows.has(row)" ></mat-row>
+
+    </div>
+    <div *ngIf="role === '3'">
+
+      <mat-row *matRowDef="let row; columns: displayedColumns;"  class="{{row.recordState === 3 ? 'rowRG2' : 'rowR2'}}"   [class.active]="clickedRows.has(row)" ></mat-row>
+
+    </div>
+    <div *ngIf="role === '5'">
+
+      <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onEdit(row.paymentToCompanyId, row.recordState)" class="{{row.recordState === 3 ? 'rowRG2' : 'rowR'}}"   [class.active]="clickedRows.has(row)" ></mat-row>
+
+    </div>
 
   </mat-table>
 
@@ -124,6 +158,11 @@
           <h3>{{paymentCode}}</h3>
           <h3>:</h3>
           <h3>{{ index.paymentCode }}</h3>
+        </div>
+        <div fxLayoutGap="5px" class="index_row">
+          <h3>{{receiptno}}</h3>
+          <h3>:</h3>
+          <h3>{{ index.receiptno }}</h3>
         </div>
         <div fxLayoutGap="5px" class="index_row">
           <h3>{{paymentType}}</h3>

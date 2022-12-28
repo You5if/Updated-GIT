@@ -3,13 +3,13 @@ import { UIService } from 'src/app/components/shared/uiservices/UI.service';
 import { MessageBoxService } from 'src/app/components/messagebox/message-box.service';
 import { AuthService } from 'src/app/components/security/auth/auth.service';
 import { CommonService } from 'src/app/components/common/common.service';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PaymentToCompanyModel } from '../paymenttocompany.model';
 import { APIResultModel } from 'src/app/components/misc/APIResult.Model';
 import { PaymentToCompanyService } from '../paymenttocompany.service';
 import { Observable, of } from 'rxjs';
 import { SelectModel, SelectCodeModel } from 'src/app/components/misc/SelectModel';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { startWith, switchMap, map } from 'rxjs/operators';
 import { SelectService } from 'src/app/components/common/select.service';
 import { AppGlobals } from 'src/app/app.global';
@@ -17,7 +17,10 @@ import { Send } from 'src/app/send.model';
 import { Sources } from 'src/app/source.model';
 import { PaymentToCompanyEntryService } from './paymenttocompany-entry.service';
 import { FileListModel } from 'src/app/system/upload/upload-file.model';
-
+import { AlertifyService } from 'src/app/alertify.service';
+// import { last } from '@angular/router/src/utils/collection';
+import { CheckforsubmitComponent } from '../submitcheck/checkfordelete.component';
+import { ConfBoxComponent } from '../../confirmbox/checkfordelete.component';
 import { Direction } from '@angular/cdk/bidi';
 
 @Component({
@@ -27,29 +30,41 @@ import { Direction } from '@angular/cdk/bidi';
 })
 
 export class PaymentToCompanyEntryComponent implements OnInit {
-    url: string;
-    model2: Send ;
-    model22: Send ;
-    model3: Send ;
-    model4: Send ;
+    url!: string;
+    model2!: Send ;
+    model22!: Send ;
+    model3!: Send ;
+    model4!: Send ;
     childElemInit: Sources[] = [];
     childElemInit2: Sources[] = [];
     childElemInit3: Sources[] = [];
     childElemInit4: Sources[] = [];
-    verCh2: Sources;
-    verCh22: Sources;
-    verCh3: Sources;
-    verCh4: Sources;
-    inAppearance : boolean;
-    chAppearance : boolean;
+    verCh2!: Sources;
+    verCh22!: Sources;
+    verCh3!: Sources;
+    verCh4!: Sources;
+    inAppearance! : boolean;
+    chAppearance !: boolean;
     childElemDark: Sources[] = [];
     childElemDark2: Sources[] = [];
     childElemDark3: Sources[] = [];
     childElemDark4: Sources[] = [];
-    vale: Sources[]
-    vale2: Sources[]
-    vale3: Sources[]
-    vale4: Sources[]
+    vale!: Sources[]
+    vale2!: Sources[]
+    vale3!: Sources[]
+    vale4!: Sources[]
+
+    invoiceTotal!: number
+    paidTotal!: number
+    pendingTotal!: number
+    Balance!: number
+    invoiceTotalL!: string
+    paidTotalL!: string
+    pendingTotalL!: string
+    BalanceL!: string
+
+
+
     childElem: any = {
       records: [],
       auditColumn: {
@@ -208,66 +223,76 @@ export class PaymentToCompanyEntryComponent implements OnInit {
       languageId: Number(localStorage.getItem(this._globals.baseAppName + '_language'))
     };
     
-    myFormGroup: FormGroup;
+    myFormGroup!: FormGroup;
+
+    amountError: boolean = false;
   
-    breakpoint: number;
-    paymentTypeOption: string;
+    breakpoint!: number;
+    paymentTypeOption!: string;
     checked= false;
     checkedR = false;
     disabled = false;
     sources: Sources[] = [];
     res: any;
     spacepoint: any;
-    spacezone: boolean;
-    data: Sources[];
-    ver: Sources;
-    maxSize: number;
-    submit: string;
-    cancel: string;
+    spacezone!: boolean;
+    data!: Sources[];
+    ver!: Sources;
+    maxSize!: number;
+    submit!: string;
+    cancel!: string;
   
     light: Sources[] = [];
     dark: Sources[] = [];
   
-    ver2: Sources;
-    ver3: Sources;
-    ver4: Sources;
-    obj1: Sources;
-    obj2: Sources;
-    stringOfV: string;
-  refString: string;
+    ver2!: Sources;
+    ver3!: Sources;
+    ver4!: Sources;
+    obj1!: Sources;
+    obj2!: Sources;
+    stringOfV!: string;
+  refString!: string;
 
+  showMaxCredit: boolean = false;
+  maxCredit!: string;
   
-    direction: Direction;
+    direction!: Direction;
     dropListItem1: Sources[] = [];
-    dropItemchild1: Sources;
+    dropItemchild1!: Sources;
   
-    dropItem: Sources;
+    dropItem!: Sources;
     container: any[][] =[];
   
     accountList: SelectModel[] = [];
   
-    dialog_title: string | null = localStorage.getItem(this._globals.baseAppName + '_Add&Edit');
+    dialog_title: string|null = localStorage.getItem(this._globals.baseAppName + '_Add&Edit');
   
     dropList: Sources[] = [];
 
-    showit: boolean;
+    showit!: boolean;
   visible: boolean = true;
-  imagePathUrl: string;
-  imagePathUrl2: string;
+  imagePathUrl!: string;
+  imagePathUrl2!: string;
   lFiles: FileListModel[] = [];
   imgHttp:string = "http://h"
+
+  rateControl!: FormControl
+  showGridDetail: boolean = false;
 
 
 
   constructor(
     private dapiService: PaymentToCompanyEntryService,
       private _ui: UIService,
+      public dialog: MatDialog,
       private _msg: MessageBoxService,
       private _auth: AuthService,
       private _globals: AppGlobals,
       private _select: SelectService,
+      private alertify: AlertifyService,
       private _myService: PaymentToCompanyService,
       private dialogRef: MatDialogRef<PaymentToCompanyEntryComponent>,
+      // private dialogRef2: MatDialogRef<CheckforsubmitComponent>,
       @Inject(MAT_DIALOG_DATA) public pModel: Send
   ) { }
 
@@ -275,34 +300,54 @@ export class PaymentToCompanyEntryComponent implements OnInit {
     this.showit = false
     if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
         this.direction = "ltr"
-        
+        this.invoiceTotalL = "Invoice total"
+        this.paidTotalL = "Paid total"
+        this.pendingTotalL = "Pending total"
+        this.BalanceL = "Balance"
         this.submit = "Submit"
         this.cancel = "Cancel"
         
       }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
         this.direction = "rtl"
+        this.invoiceTotalL = "مجموع الفواتير"
+        this.paidTotalL = "مجموع المدفوع"
+        this.pendingTotalL = "مجموع المتاخرات"
+        this.BalanceL = "الرصيد"
         this.submit = "ارسال"
         this.cancel = "الغاء"
        
   
       }
 
-      this.inAppearance = false
+      this.inAppearance = true
       this.chAppearance = false
   
-  
+      
   
       this._ui.loadingStateChanged.next(true);
       this.dapiService.Controllers(this.pModel).subscribe(res => {
         this._ui.loadingStateChanged.next(false);
         console.log("hello")
         this.data = res;
+
+        if (this.data[3] && this.data[3].tableColumnId == 303 && this.data[3].access == "ViewOnly") {
+          this._select.getDropdown(this.data[3].refId, this.data[3].refTable, this.data[3].refColumn, this.data[3].refCondition, false).subscribe((resu: SelectModel[]) => {
+            console.log("naruto:" ,resu);
+            
+            resu.forEach((r) => {
+              if (r.id == +this.data[3].value) {
+                this.data[3].idCount = r.name
+              }
+            })
+          })
+        }
         
         if(localStorage.getItem(this._globals.baseAppName + '_Add&Edit2') == "Edit") {
-          this.onChangePaymentTypeEdit(+this.data[3].value)
+          this.onChangePaymentTypeEdit(this.data[3].value)
+          this.onGetInvoiceBalance(Number(this.data[8].value))
           if(this.data.length > 0) {
     
-            this.dapiService.getChild1ItembyChild1(+this.data[0].value).subscribe((res) => {
+            this.dapiService.getChild1ItembyChild1(Number(this.data[2].value)).subscribe((res) => {
       
             this._ui.loadingStateChanged.next(false);
             
@@ -318,7 +363,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
               
             }
             )
-            this.dapiService.getChild2ItembyChild2(+this.data[0].value).subscribe((res) => {
+            this.dapiService.getChild2ItembyChild2(+this.data[2].value).subscribe((res) => {
       
               this._ui.loadingStateChanged.next(false);
               
@@ -335,7 +380,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
               }
               )
 
-              this.dapiService.getChild3ItembyChild3(+this.data[0].value).subscribe((res) => {
+              this.dapiService.getChild3ItembyChild3(+this.data[2].value).subscribe((res) => {
       
                 this._ui.loadingStateChanged.next(false);
                 
@@ -352,16 +397,16 @@ export class PaymentToCompanyEntryComponent implements OnInit {
                 }
                 )
 
-                this.dapiService.getChild4ItembyChild4(+this.data[0].value).subscribe((res) => {
+                this.dapiService.getChild4ItembyChild4(+this.data[2].value).subscribe((res) => {
       
                   this._ui.loadingStateChanged.next(false);
                   
                     console.log("EditRes2",res)
           
                     
-                    for(let k=0;k<res.length;k++){
-                      this.addChild4Item(res[k].paymentToCompanyAttachmentId)
-                    }
+                    // for(let k=0;k<res.length;k++){
+                    //   this.addChild4Item(res[k].paymentToCompanyAttachmentId)
+                    // }
           
                     
                     
@@ -370,7 +415,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
                   )
             
           }else {
-            this.addChild1Item(0)
+            // this.addChild1Item(0)
           }
           
         }
@@ -381,7 +426,6 @@ export class PaymentToCompanyEntryComponent implements OnInit {
             if (this.ver2.type === "dropdown") {
               this.dropList.push(this.ver2);
               console.log("droplist: ",this.dropList)
-  
   
               // this.tableId = this.ver2.refId;
               // this.tableName = this.ver2.refTable;
@@ -399,6 +443,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
           }
   
         }
+        this.onChangePaymentType2(+this.data[3].value)
         this.breakpoint =
         window.innerWidth <= 960
           ? 1
@@ -411,15 +456,55 @@ export class PaymentToCompanyEntryComponent implements OnInit {
               // this.tableName = this.dropItem.refTable;
               // this.displayColumn = this.dropItem.refColumn;
               // this.condition = this.dropItem.refCondition;
+              // if(this.dropItem.tableColumnId == 303){
+              //   this._select.getDropdown(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false).subscribe((res: SelectModel[]) => {
+              //     console.log("drop: ", res);
+              //     this.dropList[k].myarray = res;
+              //     this.dropList[k].myarray.push({id: -1, name: 'Credit'})
+              //     this.container.push(res);
+
+              //     console.log(this.container)
+              //   })
+              // }else 
+              if(this.dropItem.tableColumnId == 308){
+                this._select.getDropdown2(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false, +this.data[7].value, +this.data[8].value).subscribe((res: SelectModel[]) => {
+                  console.log("drop: ", res);
+                  this.dropList[k].myarray = res;
+                  
+                  this.container.push(res);
+
+                  console.log(this.container)
+                })
+              }else if(this.dropItem.tableColumnId == 309){
+                this._select.getDropdown2(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false, +this.data[7].value, +this.data[8].value).subscribe((res: SelectModel[]) => {
+                  console.log("drop: ", res);
+                  this.dropList[k].myarray = res;
+                  
+                  this.container.push(res);
+
+                  console.log(this.container)
+                })
+              }else if(this.dropItem.tableColumnId == 311){
+                this._select.getDropdown(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition + this.data[7].value, false).subscribe((res: SelectModel[]) => {
+                  console.log("drop4443: ", res);
+                  this.dropList[k].myarray = res;
+                  
+                  this.container.push(res);
+
+                  console.log(this.container)
+                })
+              }else {
+                this._select.getDropdown(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false).subscribe((res: SelectModel[]) => {
+                  console.log("drop: ", res);
+                  this.dropList[k].myarray = res;
+                  this.container.push(res);
+                  console.log(this.container)
+                });
+              }
   
-            this._select.getDropdown(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false).subscribe((res: SelectModel[]) => {
-          console.log("drop: ", res);
-          this.dropList[k].myarray = res;
-          this.container.push(res);
-          console.log(this.container)
+            
   
   
-      });
   
         }
         console.log("light: ",this.light);
@@ -432,7 +517,19 @@ export class PaymentToCompanyEntryComponent implements OnInit {
       })
   }
 
-  public uploadFinished = (event: any, id: number) => { // this is event being called when file gets uploaded
+  onGetInvoiceBalance(id:number) {
+    this.dapiService.getInvoiceTotal(id).subscribe((result => {
+      this.showGridDetail = true
+      this.invoiceTotal = result[0].invoiceTotal
+      this.paidTotal = result[0].paidTotal
+      this.pendingTotal = result[0].pendingTotal
+      this.Balance = result[0].balance
+    }))
+  }
+
+  onChange1(a:any, b:any){}
+
+  public uploadFinished = (event:any, id: number) => { // this is event being called when file gets uploaded
     
     var file: FileListModel = {
         originalFileName: event.originalFileName,
@@ -543,21 +640,38 @@ export class PaymentToCompanyEntryComponent implements OnInit {
 }
 
   onChangePaymentAganist(id: number) {
-    if (id == 26001) {
-      this.light[7].value = "1"
-      this.light[8].value = "1"
+    if (id == 31003) {
+      this.data[10].value = "1"
+      this.data[11].value = "1"
       this.inAppearance = true
       this.chAppearance = false
-    } else if (id == 26002) {
-      this.light[7].value = "1"
-      this.light[8].value = "1"
+    } else if (id == 31002) {
+      this.data[10].value = "1"
+      this.data[11].value = "1"
       this.inAppearance = false
       this.chAppearance = true
-    } else if (id == 26003) {
-      this.light[7].value = "1"
-      this.light[8].value = "1"
+    } else if (id == 31001) {
+      this.data[10].value = "1"
+      this.data[11].value = "1"
       this.inAppearance = false
       this.chAppearance = false
+    }
+    console.log(this.data);
+    
+  }
+
+  onAmountChange(e: Event) {
+    let num= Number((<HTMLInputElement>e.target).value)
+    if (+this.maxCredit != 0.00) {
+      if (num > +this.maxCredit) {
+        // this.alertify.error('Amount is greater than credit')
+        this.amountError = true
+        this.data[6].value = this.maxCredit
+
+      }
+      else{
+        this.amountError = false
+      }
     }
   }
 
@@ -565,7 +679,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
     
     console.log(id);
     if (id == 18001) {
-      
+      this.showMaxCredit = false
       this.paymentTypeOption = "Cash"
       // this.onClose()
       this.lastDark.child1 = []
@@ -574,27 +688,73 @@ export class PaymentToCompanyEntryComponent implements OnInit {
       this.last.child1 = []
       this.last.child2 = []
       this.last.child3 = []
+      
+      this.data[15].access = "Editable"
+      this.data[16].access = "Editable"
+      this.data[17].access = "Editable"
+      this.data[15].value = "1"
+      this.data[16].value = "1"
+      this.data[17].value = "0"
     } else if (id == 18002) {
+      this.showMaxCredit = false
       this.paymentTypeOption = "Cheque"
       this.addChild1Item(0)
       this.lastDark.child2 = []
       this.lastDark.child3 = []
       this.last.child2 = []
       this.last.child3 = []
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
+      this.data[15].value = "1"
+      this.data[16].value = "1"
+      this.data[17].value = "0"
     } else if (id == 18003) {
+      this.showMaxCredit = false
       this.paymentTypeOption = "Wire tran"
       this.addChild2Item(0)
       this.lastDark.child1 = []
       this.lastDark.child3 = []
       this.last.child1 = []
       this.last.child3 = []
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
+      this.data[15].value = "1"
+      this.data[16].value = "1"
+      this.data[17].value = "0"
     } else if (id == 18004) {
+      this.showMaxCredit = false
       this.paymentTypeOption = "Deposite"
       this.addChild3Item(0)
       this.lastDark.child1 = []
       this.lastDark.child2 = []
       this.last.child1 = []
       this.last.child2 = []
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
+      this.data[15].value = "1"
+      this.data[16].value = "1"
+      this.data[17].value = "0"
+    } else if (id == -1) {
+      this.paymentTypeOption = "Credit"
+      this.showMaxCredit = true
+      this.dapiService.getMaxCredit(+this.data[7].value, + this.data[8].value).subscribe((reso) => {
+        this.maxCredit  =  reso.name
+        console.log(this.maxCredit);
+        
+      })
+      this.lastDark.child1 = []
+      this.lastDark.child2 = []
+      this.last.child1 = []
+      this.last.child2 = []
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
+      this.data[15].value = "1"
+      this.data[16].value = "1"
+      this.data[17].value = "0"
     } 
     console.log("close");
     
@@ -606,23 +766,62 @@ export class PaymentToCompanyEntryComponent implements OnInit {
     this._ui.loadingStateChanged.next(true);
     this._ui.loadingStateChanged.next(false);
   }
-  onChangePaymentTypeEdit(id: number) {
-    this._ui.loadingStateChanged.next(true);
+
+  onChangePaymentType2(id: number) {
+    // this._ui.loadingStateChanged.next(true);
     console.log(id);
     if (id == 18001) {
       this.paymentTypeOption = "Cash"
+      this.data[15].access = "Editable"
+      this.data[16].access = "Editable"
+      this.data[17].access = "Editable"
+      
       
     } else if (id == 18002) {
       this.paymentTypeOption = "Cheque"
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
       
     } else if (id == 18003) {
       this.paymentTypeOption = "Wire tran"
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
       
     } else if (id == 18004) {
       this.paymentTypeOption = "Deposite"
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
+      
+    } else if (id == -1) {
+      this.paymentTypeOption = "Credit"
+      this.data[15].access = "NoAccess"
+      this.data[16].access = "NoAccess"
+      this.data[17].access = "NoAccess"
       
     } 
-    this._ui.loadingStateChanged.next(false);
+    // this._ui.loadingStateChanged.next(false);
+  }
+  onChangePaymentTypeEdit(id: string) {
+    console.log(id);
+    if (id == "18001") {
+      this.paymentTypeOption = "Cash"
+      
+    } else if (id == "18002") {
+      this.paymentTypeOption = "Cheque"
+      
+    } else if (id == "18003") {
+      this.paymentTypeOption = "Wire tran"
+      
+    } else if (id == "18004") {
+      this.paymentTypeOption = "Deposite"
+      
+    } else if (id == "-1") {
+      this.paymentTypeOption = "Credit"
+      
+    } 
   }
 
 
@@ -733,7 +932,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
       this.childElem2 = this.childElem
 
       //this.last.child1.push(this.childElem2);
-      this.last.child1.push(myElem)
+      this.last.child1 = [myElem]
      
       
     })
@@ -833,7 +1032,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
       this.childElem2T = this.childElemT
 
       //this.last.child1.push(this.childElem2);
-      this.last.child2.push(myElem)
+      this.last.child2 = [myElem]
      
       
     })
@@ -1033,48 +1232,54 @@ export class PaymentToCompanyEntryComponent implements OnInit {
     console.log('I ran from delete');
     // this.elem.splice(id, 1);
     this.last.child1.splice(id, 1)
-    if(this.last.child1.length == 0){
-      this.addChild1Item(0)
-    }
+    // if(this.last.child1.length == 0){
+    //   this.addChild1Item(0)
+    // }
     this.lastDark.child1.splice(id, 1)
     }
   deleteFun2(id: number) {
     console.log('I ran from delete');
     // this.elem.splice(id, 1);
     this.last.child2.splice(id, 1)
-    if(this.last.child2.length == 0){
-      this.addChild2Item(0)
-    }
+    // if(this.last.child2.length == 0){
+    //   this.addChild2Item(0)
+    // }
     this.lastDark.child2.splice(id, 1)
     }
   deleteFun3(id: number) {
     console.log('I ran from delete');
     // this.elem.splice(id, 1);
     this.last.child3.splice(id, 1)
-    if(this.last.child3.length == 0){
-      this.addChild3Item(0)
-    }
+    // if(this.last.child3.length == 0){
+    //   this.addChild3Item(0)
+    // }
     this.lastDark.child3.splice(id, 1)
     }
   deleteFun4(id: number) {
     console.log('I ran from delete');
     // this.elem.splice(id, 1);
     this.last.child4.splice(id, 1)
-    if(this.last.child4.length == 0){
-      this.addChild4Item(0)
-    }
+    // if(this.last.child4.length == 0){
+    //   this.addChild4Item(0)
+    // }
     this.lastDark.child4.splice(id, 1)
     }
 
     onChangeValueC(id: number) {
       this.stringOfV = id.toString()
       console.log("working fine")
+      this.showGridDetail = false
+      // this.dapiService.getMaxCredit(+this.data[7].value, + this.data[8].value).subscribe((reso) => {
+      //   this.maxCredit  =  reso.name
+      //   console.log(this.maxCredit);
+        
+      // })
       for(let k=0;k<=this.dropList.length;k++) {
         
         if(this.dropList[k].tableColumnId == 308) {
           this.dropItem = this.dropList[k]
           this.refString = this.dropItem.refCondition + this.stringOfV
-          this._select.getDropdown(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.refString, false).subscribe((res: SelectModel[]) => {
+          this._select.getDropdown2(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false, +this.data[7].value, + this.data[8].value).subscribe((res: SelectModel[]) => {
             console.log("drop: ", res);
             this.dropList[k].myarray = res;
             this.container.push(res);
@@ -1087,7 +1292,7 @@ export class PaymentToCompanyEntryComponent implements OnInit {
         if(this.dropList[k].tableColumnId == 309) {
           this.dropItem = this.dropList[k]
           this.refString = this.dropItem.refCondition + this.stringOfV
-          this._select.getDropdown(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.refString, false).subscribe((res: SelectModel[]) => {
+          this._select.getDropdown2(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false, +this.data[7].value, + this.data[8].value).subscribe((res: SelectModel[]) => {
             console.log("drop: ", res);
             this.dropList[k].myarray = res;
             this.container.push(res);
@@ -1114,14 +1319,71 @@ export class PaymentToCompanyEntryComponent implements OnInit {
   
       }
     }
+    onChangeValueC2(id: number) {
+      
+      console.log("working fine")
+      this.showGridDetail = false
+      // this.dapiService.getMaxCredit(+this.data[7].value, + this.data[8].value).subscribe((reso) => {
+      //   this.maxCredit  =  reso.name
+      //   console.log(this.maxCredit);
+        
+      // })
+      for(let k=0;k<=this.dropList.length;k++) {
+        
+        if(this.dropList[k].tableColumnId == 308) {
+          this.dropItem = this.dropList[k]
+          console.log(this.dropItem);
+          
+          // this.refString = this.dropItem.refCondition + id.toString()
+         this.dapiService.getInvoices(id).subscribe((res: SelectModel[]) => {
+              console.log("drop: ", res);
+              this.dropList[k].myarray = res;
+              this.container.push(res);
+              console.log(this.container)
+      
+      
+          });
+        
+        }
+        // if(this.dropList[k].tableColumnId == 309) {
+        //   this.dropItem = this.dropList[k]
+        //   this.refString = this.dropItem.refCondition + this.stringOfV
+        //   this._select.getDropdown2(this.dropItem.refId, this.dropItem.refTable, this.dropItem.refColumn, this.dropItem.refCondition, false, +this.data[7].value, + this.data[8].value).subscribe((res: SelectModel[]) => {
+        //     console.log("drop: ", res);
+        //     this.dropList[k].myarray = res;
+        //     this.container.push(res);
+        //     console.log(this.container)
+    
+    
+        // });
+        
+        // }
 
-    handleKeyUp(e:any){
-      if(e.keyCode === 13){
-         this.onSubmit();
+        
+  
       }
     }
 
-    onSubmit() {
+    // handleKeyUp(e){
+    //   if(e.keyCode === 13){
+    //      this.onSubmit();
+    //   }
+    // }
+
+    
+
+      onSubmit () {
+        
+      //     this.dialogRef2 = this.dialog.open(CheckforsubmitComponent, {
+      //       disableClose: true,
+            
+      //       data: this.lastDark
+      //     });
+       
+      //   this.dialogRef2.afterClosed().subscribe(() => {
+      //     this.dialogRef.close();
+      //   });
+      // }
 
       // this.data.forEach((Object)=> this.light.forEach((obj)=>
       // {
@@ -1140,108 +1402,35 @@ export class PaymentToCompanyEntryComponent implements OnInit {
   
       // console.log(JSON.stringify(this.data))
   
-      for(let i=0;i<=this.data.length;i++){
-        this.obj1 = this.data[i];
-         if(this.obj1 ){
-          //  this.last.records.push(this.obj1);
-           this.lastDark.records.push(this.obj1);
-         }
-       }
-  
-      //  console.log(JSON.stringify(this.last));
-      //  console.log("Dark",JSON.stringify(this.lastDark));
-  
-       for(let i=0; i< this.lastDark.child1.length;i++){
-         this.lastDark.child1[i].records[0].value = "0"
-        //  this.lastDark.child1[i].records[1].value = this.lastDark.records[0].value
-         this.vale = this.lastDark.child1[i].records
-         this.vale.forEach((val) => {
-           val.entryMode = "A"
-         })
-       }
-
-       this.lastDark.records.sort(function(a:any, b:any) { 
-        return a.applicationOrder - b.applicationOrder  ||  a.label.localeCompare(b.label);
-      });
-      for (let i = 0; i < this.lastDark.child1.length; i++) {
-        this.lastDark.child1[i].records.sort(function(a:any, b:any) { 
-          return a.applicationOrder - b.applicationOrder  ||  a.label.localeCompare(b.label);
-        });
-      }
-      for (let i = 0; i < this.lastDark.child2.length; i++) {
-        this.lastDark.child2[i].records.sort(function(a:any, b:any) { 
-          return a.applicationOrder - b.applicationOrder  ||  a.label.localeCompare(b.label);
-        });
-      }
-      for (let i = 0; i < this.lastDark.child3.length; i++) {
-        this.lastDark.child3[i].records.sort(function(a:any, b:any) { 
-          return a.applicationOrder - b.applicationOrder  ||  a.label.localeCompare(b.label);
-        });
-      }
-      for (let i = 0; i < this.lastDark.child4.length; i++) {
-        this.lastDark.child4[i].records.sort(function(a:any, b:any) { 
-          return a.applicationOrder - b.applicationOrder  ||  a.label.localeCompare(b.label);
-        });
-      }
-  
-       console.log("Dark",JSON.stringify(this.lastDark));
-  
        
         
-            if(this.lastDark.records[0].entryMode == "A"){
-              console.log('Last:', JSON.stringify(this.lastDark));
-             this.dapiService.EntryA(this.lastDark).subscribe(nexto => {
-               this.res = nexto;
-               if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
-                this._msg.showInfo("Message", "Saved succesfully");
-              this.dialogRef.close();
-              }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
-                this._msg.showInfo("رسالة", "تم الحفظ بنجاح");
-              this.dialogRef.close();
-              }
-       
-             }, error => {
-               console.log(error);
-               if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
-                this._msg.showInfo("Message", "Error!!");
-              this.dialogRef.close();
-              }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
-                
-                this._msg.showInfo("رسالة", "توجد مشكلة");
-              this.dialogRef.close();
-              }
-             });
-           }else if(this.lastDark.records[0].entryMode == "E"){
-             this.dapiService.EntryE(this.lastDark).subscribe(nexto => {
-               this.res = nexto;
-               if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
-                this._msg.showInfo("Message", "Saved succesfully");
-              this.dialogRef.close();
-              }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
-                this._msg.showInfo("رسالة", "تم الحفظ بنجاح");
-              this.dialogRef.close();
-              }
-       
-             }, error => {
-               console.log(error);
-               if(localStorage.getItem(this._globals.baseAppName + '_language') == "16001") {
-                this._msg.showInfo("Message", "Error!!");
-              this.dialogRef.close();
-              }else if(localStorage.getItem(this._globals.baseAppName + '_language') == "16002") {
-                
-                this._msg.showInfo("خطأ!!", "توجد مشكلة");
-              this.dialogRef.close();
-              }
-             });
-           }
+       const dialogRef2 = this.dialog.open(ConfBoxComponent, {
+        disableClose: false,
+        data: {
+          name: 'PaymentToCompany', 
+          arr: this.lastDark,
+          data: this.data
+        }
+      });
+  
+      dialogRef2.afterClosed(
+      //   ConfBoxComponent, {
+      //   disableClose: false,
+      //   data: {}
+      // }
+      ).subscribe(() => {
+        if (localStorage.getItem(this._globals.baseAppName + '_Confirm') === 'yes') {
+          this.dialogRef.close();
+        }
+      });
           
         
-        
+          }
         
   
       
   
-        }
+     
 
 
 

@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { AppGlobals } from 'src/app/app.global';
 import { CommonService } from 'src/app/components/common/common.service';
 import { map, catchError } from 'rxjs/operators';
- 
+// import { element, elementClassProp } from '@angular/core/src/render3';
 import { Http, Response } from '@angular/http';
 import { AuthService } from 'src/app/components/security/auth/auth.service';
 import { PaymentToCompanyModel } from './paymenttocompany.model';

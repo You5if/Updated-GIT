@@ -679,6 +679,18 @@ export class SelectService {
         catchError(this._cf.handleError)
       );
   }
+  getDropdown3(IdColumn:string, TableName:string, DisplayColumn:string, Condition:string,  pNoneRequired: boolean = false, id1: number, id2: number): Observable<SelectModel[]> {
+    return this.httpClient
+      .get<SelectModel[]>(
+        this._globals.baseAPIUrl + "Ddl/getdropdown/" +IdColumn +"/" + TableName +"/" + DisplayColumn + "/"  + Condition + id1 + " and customeraccountid=" + id2+ "/" + pNoneRequired
+      )
+      .pipe(
+        map((response: SelectModel[]) => {
+          return response;
+        }),
+        catchError(this._cf.handleError)
+      );
+  }
 
 
 }

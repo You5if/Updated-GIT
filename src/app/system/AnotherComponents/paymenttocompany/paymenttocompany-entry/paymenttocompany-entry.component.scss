@@ -8,6 +8,12 @@
   background-color: gray;
 }
 
+.fontYA {
+  font-size: 14px !important;
+  margin: 0;
+  font-weight: lighter;
+}
+
 .section {
   width: 700px;
 }
@@ -19,7 +25,7 @@
 .Main {
   width: 100%;
   padding: 0;
-  height: 390px;
+  height: 300px;
   overflow: hidden;
   overflow-y: scroll;
 }
@@ -144,6 +150,13 @@ mat-radio-button {
 label {
   font-family: "Gill Sans", sans-serif;
   font-weight: 100;
+}
+.error {
+  color: red;
+  font-weight: bolder;
+}
+.sdgFont {
+  font-weight: bolder;
 }
 .textArea {
   height: 35px;

@@ -10,6 +10,7 @@ import { Http } from '@angular/http';
 import { AuthService } from 'src/app/components/security/auth/auth.service';
 import { Observable } from 'rxjs';
 import { BankDeposittocompanyModel, chequetocompanyModel, paymenttocompanyattachmentModel, wiretransfertocompanyModel } from '../paymenttocompany.model';
+import { SelectModel } from 'src/app/components/misc/SelectModel';
 
 
 @Injectable({
@@ -49,6 +50,13 @@ export class PaymentToCompanyEntryService {
            }), catchError(this._cf.handleError));
            }
 
+        getInvoices(id: number): Observable<SelectModel[]> {
+            return this.httpClient.get<SelectModel[]>(this._globals.baseAPIUrl + 'PaymentToCompany/GetInvoiceByCustomerId/' + id).pipe(
+            map((result: SelectModel[]) => {
+            return result;
+            }), catchError(this._cf.handleError)
+            );
+           }
         getChild1ItembyChild1(id: number): Observable<chequetocompanyModel[]> {
             return this.httpClient.get<chequetocompanyModel[]>(this._globals.baseAPIUrl + 'ChequeToCompany/bypayment/' + id).pipe(
             map((result: chequetocompanyModel[]) => {
@@ -99,6 +107,21 @@ export class PaymentToCompanyEntryService {
         getChild4ItembyChild4(id: number): Observable<paymenttocompanyattachmentModel[]> {
             return this.httpClient.get<paymenttocompanyattachmentModel[]>(this._globals.baseAPIUrl + 'PaymentToCompanyAttachment/bypayment/' + id).pipe(
             map((result: paymenttocompanyattachmentModel[]) => {
+            return result;
+            }), catchError(this._cf.handleError)
+            );
+           }
+        
+        getMaxCredit(id1: number, id2:number): Observable<any> {
+            return this.httpClient.get<any>(this._globals.baseAPIUrl + 'PaymentToCompany/getcredit/' + id1 + '/' + id2).pipe(
+            map((result: any) => {
+            return result;
+            }), catchError(this._cf.handleError)
+            );
+           }
+        getInvoiceTotal(id1: number): Observable<any> {
+            return this.httpClient.get<any>(this._globals.baseAPIUrl + 'Invoice/getinvoicebalance/' + id1 ).pipe(
+            map((result: any) => {
             return result;
             }), catchError(this._cf.handleError)
             );

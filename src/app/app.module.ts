@@ -205,7 +205,6 @@ import { CompanyBankBranchAccountEntryComponent } from "./system/AnotherComponen
 import { InvoiceComponent } from "./system/AnotherComponents/invoice/invoice.component";
 import { InvoiceEntryComponent } from "./system/AnotherComponents/invoice/invoice-entry/invoice-entry.component";
 import { PaymentToCompanyComponent } from "./system/AnotherComponents/paymenttocompany/paymenttocompany.component";
-import { PaymentToCompanyEntryComponent } from "./system/AnotherComponents/paymenttocompany/paymenttocompany-entry/paymenttocompany-entry.component";
 import { ProductPricingComponent } from "./system/AnotherComponents/productpricing/productpricing.component";
 import { ProductPricingEntryComponent } from "./system/AnotherComponents/productpricing/productpricing-entry/productpricing-entry.component";
 import { StockInEntryComponent } from "./system/AnotherComponents/stockin/stockin-entry/stockin-entry.component";
@@ -267,6 +266,10 @@ import { MySortComponent } from "./system/journalentry/operation/my-sort/my-sort
 
 import { AlertifyService } from "./alertify.service";
 import { MyTestAutoComponent } from "./system/my-test-auto/my-test-auto.component";
+import { CheckforstateCompComponent } from "./system/AnotherComponents/paymenttocompany/statecheck/checkfordelete.component";
+import { CheckforsubmitComponent } from "./system/AnotherComponents/paymenttocompany/submitcheck/checkfordelete.component";
+import { ConfBoxComponent } from "./system/AnotherComponents/confirmbox/checkfordelete.component";
+import { PaymentToCompanyEntryComponent } from "./system/AnotherComponents/paymenttocompany/paymenttocompany-entry/paymenttocompany-entry.component";
 
 
 
@@ -479,8 +482,7 @@ export const jwtConfig = {
     CompanyBankBranchAccountEntryComponent,
     InvoiceComponent,
     InvoiceEntryComponent,
-    PaymentToCompanyComponent,
-    PaymentToCompanyEntryComponent,
+    
     ProductPricingComponent,
     ProductPricingEntryComponent,
     StockInComponent,
@@ -519,7 +521,12 @@ export const jwtConfig = {
     CardUserEntryComponent,
     MyFilterComponent,
     MySortComponent,
-    MyTestAutoComponent
+    MyTestAutoComponent,
+    CheckforsubmitComponent,
+    CheckforstateCompComponent,
+    ConfBoxComponent,
+    PaymentToCompanyComponent,
+    PaymentToCompanyEntryComponent,
 
 
 
@@ -661,7 +668,7 @@ export const jwtConfig = {
     CompanyBankBranchEntryComponent,
     CompanyBankBranchAccountEntryComponent,
     InvoiceEntryComponent,
-    PaymentToCompanyEntryComponent,
+    
     ProductPricingEntryComponent,
     StockInEntryComponent,
     StockMovementEntryComponent,
@@ -678,7 +685,11 @@ export const jwtConfig = {
     ChangePasswordNewComponent,
     CardUserEntryComponent,
     MyFilterComponent,
-    MySortComponent
+    MySortComponent,
+    CheckforsubmitComponent,
+    CheckforstateCompComponent,
+    ConfBoxComponent,
+    PaymentToCompanyEntryComponent
   ]
 })
 export class AppModule {}

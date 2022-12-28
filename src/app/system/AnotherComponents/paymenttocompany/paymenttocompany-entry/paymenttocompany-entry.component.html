@@ -13,7 +13,7 @@
     <div class="container">
       <mat-grid-list
         [cols]="breakpoint"
-        rowHeight="105px"
+        rowHeight="110px"
         (window:resize)="onResize($event)"
 
       >
@@ -50,6 +50,23 @@
             <mat-grid-tile *ngSwitchCase="'Number'">
               <div [ngSwitch]="source.access">
                 <div *ngSwitchCase="'Editable'">
+                  <div fxLayout="column" *ngIf="source.tableColumnId == 306">
+                    <mat-form-field  appearance="outline" >
+                      <mat-label>{{ source.label }}</mat-label>
+                      <input
+                        matInput
+                        [(ngModel)]="source.value"
+                        (input)="onAmountChange($event)"
+                        [ngModelOptions]="{standalone: true}"
+                        type="textbox"
+                    placeholder="Number"
+                    appIsDecimalDirective
+                      />
+    
+    
+                    </mat-form-field>
+                    <h6 class="error" *ngIf="amountError">Amount is greater than credit</h6>
+                  </div>
                   <div *ngIf="source.tableColumnId == 308">
                     <mat-form-field  appearance="outline" *ngIf="inAppearance">
                       <mat-label>{{ source.label }}</mat-label>
@@ -65,6 +82,7 @@
     
                     </mat-form-field>
                   </div>
+                 
                   <div *ngIf="source.tableColumnId == 309">
                     <mat-form-field  appearance="outline" *ngIf="chAppearance">
                       <mat-label>{{ source.label }}</mat-label>
@@ -80,7 +98,7 @@
     
                     </mat-form-field>
                   </div>
-                  <div *ngIf="source.tableColumnId != 308 && source.tableColumnId != 309">
+                  <div *ngIf="source.tableColumnId != 306  && source.tableColumnId != 308 && source.tableColumnId != 309">
                     <mat-form-field  appearance="outline">
                       <mat-label>{{ source.label }}</mat-label>
                       <input
@@ -214,7 +232,7 @@
             <mat-grid-tile *ngSwitchCase="'dropdown'">
               <div [ngSwitch]="source.access">
                 <div *ngSwitchCase="'Editable'">
-                  <div *ngIf="source.tableColumnId == 303">
+                  <div fxLayout="column" *ngIf="source.tableColumnId == 303">
                     <mat-form-field  appearance="fill">
                       <mat-label>{{ source.label }}</mat-label>
                       <mat-select
@@ -230,6 +248,10 @@
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
+                    <div fxLayout *ngIf="showMaxCredit">
+                      <h3 class="sdgFont">{{ maxCredit }}</h3>
+                      <h4>SDG</h4>
+                    </div>
                   </div>
                   <div *ngIf="source.tableColumnId == 307">
                     <mat-form-field  appearance="fill">
@@ -252,21 +274,23 @@
                     <mat-form-field  appearance="fill" *ngIf="inAppearance">
                       <mat-label>{{ source.label }}</mat-label>
                       <mat-select
+                      #choosedValue 
+                      (valueChange)="onGetInvoiceBalance(choosedValue.value)"
                         [(ngModel)]="+source.value"
                         name="{{ source.label }}"
                       >
                         <mat-option
                           *ngFor="let choice of source.myarray"
-                          [value]="choice.id"
+                          [value]="choice.invoiceId"
                         >
-                          {{ choice.name }}
+                          {{ choice.invoiceNo }}
                         </mat-option>
                       </mat-select>
                     </mat-form-field>
                     
                   </div>
                   <div *ngIf="source.tableColumnId == 309">
-                    <mat-form-field  appearance="fill" *ngIf="chAppearance">
+                    <!-- <mat-form-field  appearance="fill" *ngIf="chAppearance">
                       <mat-label>{{ source.label }}</mat-label>
                       <mat-select
                         [(ngModel)]="+source.value"
@@ -279,7 +303,48 @@
                           {{ choice.name }}
                         </mat-option>
                       </mat-select>
-                    </mat-form-field>
+                    </mat-form-field> -->
+                  
+                      <div *ngIf="showGridDetail" fxLayout="column">
+                        <div fxLayout fxLayoutGap="2px">
+                          <h4 class="fontYA">
+                            {{invoiceTotalL}}
+                          </h4>
+                          <h4 class="fontYA">:</h4>
+                          <h4 class="fontYA">
+                            {{ invoiceTotal }}
+                          </h4>
+                          
+                        </div>
+                        <div fxLayout fxLayoutGap="2px">
+                          <h4 class="fontYA">
+                            {{paidTotalL}}
+                          </h4>
+                          <h4 class="fontYA">:</h4>
+                          <h4 class="fontYA">
+                            {{ paidTotal }}
+                          </h4>
+                        </div>
+                        <div fxLayout fxLayoutGap="2px">
+                          <h4 class="fontYA">
+                            {{pendingTotalL}}
+                          </h4>
+                          <h4 class="fontYA">:</h4>
+                          <h4 class="fontYA">
+                            {{ pendingTotal }}
+                          </h4>
+                        </div>
+                        <div fxLayout fxLayoutGap="2px">
+                          <h4 class="fontYA">
+                            {{BalanceL}}
+                          </h4>
+                          <h4 class="fontYA">:</h4>
+                          <h4 class="fontYA">
+                            {{ Balance }}
+                          </h4>
+                        </div>
+                      </div>
+                    
                     
                   </div>
                   <div *ngIf="source.tableColumnId == 310">
@@ -289,7 +354,27 @@
                         [(ngModel)]="+source.value"
                         name="{{ source.label }}"
                         
-                        #choosedValue (valueChange)="onChangeValueC(choosedValue.value)"
+                        #choosedValue (valueChange)="onChangeValueC2(choosedValue.value)"
+                      >
+                        <mat-option
+                          *ngFor="let choice of source.myarray"
+                          [value]="choice.id"
+                          
+                        >
+                          {{ choice.name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    
+                  </div>
+                  <div *ngIf="source.tableColumnId == 311">
+                    <mat-form-field  appearance="fill">
+                      <mat-label>{{ source.label }}</mat-label>
+                      <mat-select
+                        [(ngModel)]="+source.value"
+                        name="{{ source.label }}"
+                        
+                        #choosedValue (valueChange)="onChangeValueC2(choosedValue.value)"
                       >
                         <mat-option
                           *ngFor="let choice of source.myarray"
@@ -303,7 +388,7 @@
                     
                   </div>
                   
-                  <div *ngIf="source.tableColumnId != 303 && source.tableColumnId != 307 && source.tableColumnId != 308 && source.tableColumnId != 309 && source.tableColumnId != 310">
+                  <div *ngIf="source.tableColumnId != 303 && source.tableColumnId != 307 && source.tableColumnId != 308 && source.tableColumnId != 309 && source.tableColumnId != 310 && source.tableColumnId != 311">
                     <mat-form-field  appearance="fill">
                       <mat-label>{{ source.label }}</mat-label>
                       <mat-select
@@ -328,8 +413,14 @@
                   *ngSwitchCase="'ViewOnly'"
                   class="radio"
                 >
+                <div *ngIf="source.tableColumnId == 303">
                   <h3>{{ source.label }}:</h3>
-                  <h5>{{ source.value }}</h5>
+                <h5>{{ source.idCount }}</h5>
+                </div>
+                <div  *ngIf="source.tableColumnId != 303">
+                  <h3>{{ source.label }}:</h3>
+                <h5>{{ source.value }}</h5>
+                </div>
                 </div>
               </div>
             </mat-grid-tile>
@@ -355,6 +446,47 @@
 
           </div>
         </div>
+        <!-- <mat-grid-tile *ngIf="showGridDetail"  >
+          <div fxLayout="column">
+            <div fxLayout fxLayoutGap="2px">
+              <h4 class="fontYA">
+                {{invoiceTotalL}}
+              </h4>
+              <h4 class="fontYA">:</h4>
+              <h4 class="fontYA">
+                {{ invoiceTotal }}
+              </h4>
+              
+            </div>
+            <div fxLayout fxLayoutGap="2px">
+              <h4 class="fontYA">
+                {{paidTotalL}}
+              </h4>
+              <h4 class="fontYA">:</h4>
+              <h4 class="fontYA">
+                {{ paidTotal }}
+              </h4>
+            </div>
+            <div fxLayout fxLayoutGap="2px">
+              <h4 class="fontYA">
+                {{pendingTotalL}}
+              </h4>
+              <h4 class="fontYA">:</h4>
+              <h4 class="fontYA">
+                {{ pendingTotal }}
+              </h4>
+            </div>
+            <div fxLayout fxLayoutGap="2px">
+              <h4 class="fontYA">
+                {{BalanceL}}
+              </h4>
+              <h4 class="fontYA">:</h4>
+              <h4 class="fontYA">
+                {{ Balance }}
+              </h4>
+            </div>
+          </div>
+        </mat-grid-tile> -->
       </mat-grid-list>
     </div>
     <div *ngIf="this.paymentTypeOption == 'Cheque'">
@@ -409,6 +541,7 @@
                       [ngModelOptions]="{standalone: true}"
                       
                       name="amount"
+                      (input)="onAmountChange($event)"
                      
                       type="textbox"
                     placeholder="Number"
@@ -491,8 +624,8 @@
                 <div [ngSwitch]="source.access">
                   <mat-checkbox
                   *ngSwitchCase="'Editable'"
-                  [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                  (ngModelChange)="source.value = $event ? '1' : '0'"
+                  [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                  (ngModelChange)="source.value = $event ? 1 : 0"
                   
                 
                   name="{{ source.label }}"
@@ -500,8 +633,8 @@
                 >
                 <mat-checkbox
                   *ngSwitchCase="'NoAccess'"
-                  [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                  (ngModelChange)="source.value = $event ? '1' : '0'"
+                  [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                  (ngModelChange)="source.value = $event ? 1 : 0"
                   
                   name="{{ source.label }}"
                   >{{ source.label }}</mat-checkbox
@@ -596,6 +729,7 @@
                         <mat-label>{{ source.label }}</mat-label>
                         <mat-select
                           [(ngModel)]="+source.value"
+                          (selectionChange)="onChange1($event.value, i)"
                           [ngModelOptions]="{standalone: true}"
                           
                         >
@@ -645,11 +779,11 @@
             </div>
           </div>
         </mat-grid-list>
-        <button mat-icon-button type="button" (click)="deleteFun(i)">
+        <!-- <button mat-icon-button type="button" (click)="deleteFun(i)">
           <mat-icon small class="mat-icon material-icons" role="img" aria-hidden="true" color="warn">
             delete
           </mat-icon>
-        </button>
+        </button> -->
         </mat-card>
       </div>
     </div>
@@ -706,6 +840,7 @@
                       [ngModelOptions]="{standalone: true}"
                       
                       name="amount"
+                      (input)="onAmountChange($event)"
                      
                       type="textbox"
                     placeholder="Number"
@@ -788,8 +923,8 @@
                 <div [ngSwitch]="source.access">
                   <mat-checkbox
                   *ngSwitchCase="'Editable'"
-                  [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                  (ngModelChange)="source.value = $event ? '1' : '0'"
+                  [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                  (ngModelChange)="source.value = $event ? 1 : 0"
                   
                 
                   name="{{ source.label }}"
@@ -797,8 +932,8 @@
                 >
                 <mat-checkbox
                   *ngSwitchCase="'NoAccess'"
-                  [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                  (ngModelChange)="source.value = $event ? '1' : '0'"
+                  [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                  (ngModelChange)="source.value = $event ? 1 : 0"
                   
                   name="{{ source.label }}"
                   >{{ source.label }}</mat-checkbox
@@ -893,6 +1028,7 @@
                         <mat-label>{{ source.label }}</mat-label>
                         <mat-select
                           [(ngModel)]="+source.value"
+                          (selectionChange)="onChange1($event.value, i)"
                           [ngModelOptions]="{standalone: true}"
                           
                         >
@@ -942,11 +1078,11 @@
             </div>
           </div>
         </mat-grid-list>
-        <button mat-icon-button type="button" (click)="deleteFun2(i)">
+        <!-- <button mat-icon-button type="button" (click)="deleteFun2(i)">
           <mat-icon small class="mat-icon material-icons" role="img" aria-hidden="true" color="warn">
             delete
           </mat-icon>
-        </button>
+        </button> -->
         </mat-card>
       </div>
     </div>
@@ -1003,6 +1139,7 @@
                       [ngModelOptions]="{standalone: true}"
                       
                       name="amount"
+                      (input)="onAmountChange($event)"
                      
                       type="textbox"
                     placeholder="Number"
@@ -1085,8 +1222,8 @@
                 <div [ngSwitch]="source.access">
                   <mat-checkbox
                   *ngSwitchCase="'Editable'"
-                  [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                  (ngModelChange)="source.value = $event ? '1' : '0'"
+                  [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                  (ngModelChange)="source.value = $event ? 1 : 0"
                   
                 
                   name="{{ source.label }}"
@@ -1094,8 +1231,8 @@
                 >
                 <mat-checkbox
                   *ngSwitchCase="'NoAccess'"
-                  [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                  (ngModelChange)="source.value = $event ? '1' : '0'"
+                  [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                  (ngModelChange)="source.value = $event ? 1 : 0"
                   
                   name="{{ source.label }}"
                   >{{ source.label }}</mat-checkbox
@@ -1190,6 +1327,7 @@
                         <mat-label>{{ source.label }}</mat-label>
                         <mat-select
                           [(ngModel)]="+source.value"
+                          (selectionChange)="onChange1($event.value, i)"
                           [ngModelOptions]="{standalone: true}"
                           
                         >
@@ -1299,6 +1437,7 @@
                     [ngModelOptions]="{standalone: true}"
                     
                     name="amount"
+                    (input)="onAmountChange($event)"
                     type="textbox"
                     placeholder="Number"
                     appIsDecimalDirective
@@ -1398,8 +1537,8 @@
               <div [ngSwitch]="source.access">
                 <mat-checkbox
                 *ngSwitchCase="'Editable'"
-                [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                (ngModelChange)="source.value = $event ? '1' : '0'"
+                [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                (ngModelChange)="source.value = $event ? 1 : 0"
                 
               
                 name="{{ source.label }}"
@@ -1407,8 +1546,8 @@
               >
               <mat-checkbox
                 *ngSwitchCase="'NoAccess'"
-                [ngModel]="source.value == '1' ? true : source.value == '0' ? false : null"
-                (ngModelChange)="source.value = $event ? '1' : '0'"
+                [ngModel]="source.value == 1 ? true : source.value == 0 ? false : null"
+                (ngModelChange)="source.value = $event ? 1 : 0"
                 
                 name="{{ source.label }}"
                 >{{ source.label }}</mat-checkbox
@@ -1503,6 +1642,7 @@
                       <mat-label>{{ source.label }}</mat-label>
                       <mat-select
                         [(ngModel)]="+source.value"
+                        (selectionChange)="onChange1($event.value, i)"
                         [ngModelOptions]="{standalone: true}"
                         
                       >
@@ -1561,9 +1701,9 @@
         
       </mat-card>
     </div>
-    <div class="btn-container">
+    <!-- <div class="btn-container">
       <button mat-raised-button class="add_btn" color="primary" (click)="addChild4Item(0)" type="submit">+ Add attachment</button>
-    </div>
+    </div> -->
     
   </form>
   <div class="btn-container2">
